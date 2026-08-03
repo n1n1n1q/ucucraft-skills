@@ -1,0 +1,20 @@
+name: UcucraftSkills
+version: '${version}'
+main: com.ucucraft.skills.SkillsPlugin
+api-version: '1.21'
+authors: [ucucraft]
+description: Classes/specialties, level progression and minigames.
+
+commands:
+  skills:
+    description: Manage classes, scrolls and minigames.
+    usage: /skills help
+    aliases: [sk, class]
+
+permissions:
+  skills.use:
+    description: Use basic player commands.
+    default: true
+  skills.admin:
+    description: Grant classes, give scrolls, run admin commands.
+    default: op

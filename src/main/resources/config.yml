@@ -1,0 +1,56 @@
+# UcucraftSkills configuration. Everything tunable lives here.
+
+# Prefix prepended to every plugin message. MiniMessage format.
+prefix: "<gradient:#7f5af0:#2cb67d>[Skills]</gradient> "
+
+# Active language file under lang/<locale>.yml
+locale: en
+
+storage:
+  # Only "yaml" is implemented. Interface allows adding "sqlite"/"mysql" later.
+  type: yaml
+
+# Default level-progression curve, used unless a class overrides it.
+# xpForLevel(n) = base * (multiplier ^ (n - 1))
+progression:
+  base-xp: 100
+  multiplier: 1.35
+  max-level: 50
+
+# The specialty scroll item.
+scroll:
+  material: PAPER
+  # MiniMessage. <class> is replaced with the target class display name.
+  name: "<gradient:#7f5af0:#2cb67d>Scroll of <class></gradient>"
+  glow: true
+  # Class id granted when the scroll is used. Must match a registered class id.
+  grants: example
+
+# Per-class tuning. Classes are registered in code but read their numbers here.
+classes:
+  example:
+    # Attribute bonus scaling per level (Paper attribute id -> per-level amount).
+    max-health-per-level: 1.0
+    # Accessibility bonus: alternative visual cue strength (0 disables).
+    # Compensates players who cannot rely on sound cues.
+    visual-cue-level: 1
+
+minigames:
+  speed-typing:
+    duration-seconds: 10
+    words: [redstone, diamond, creeper, enchant, obsidian, netherite]
+  speed-clicking:
+    duration-seconds: 5
+    target-clicks: 30
+  rhythm:
+    # Milliseconds between beats and the hit tolerance window.
+    beat-interval-ms: 800
+    tolerance-ms: 200
+    beats: 8
+    # Sound played on each beat (deaf players are disadvantaged here by design).
+    # Namespaced sound key.
+    sound: "minecraft:block.note_block.pling"
+  sequence-memory:
+    start-length: 3
+    max-length: 8
+    show-ms: 600

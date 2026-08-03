@@ -1,0 +1,58 @@
+# English messages. Every user-facing string lives here. MiniMessage format.
+# Placeholders use <name> and are provided by the code.
+
+general:
+  players-only: "<red>This command can only be used by players."
+  no-permission: "<red>You don't have permission to do that."
+  reloaded: "<green>Configuration and language files reloaded."
+  unknown-command: "<red>Unknown command. Use <yellow>/skills help</yellow>."
+
+help:
+  header: "<gray>--- <white>Skills</white> ---"
+  entries:
+    - "<yellow>/skills help</yellow> <gray>- show this help"
+    - "<yellow>/skills class</yellow> <gray>- show your class, level and XP"
+    - "<yellow>/skills class remove</yellow> <gray>- forget your class"
+    - "<yellow>/skills minigame <id></yellow> <gray>- play a minigame"
+    - "<yellow>/skills scroll [class]</yellow> <gray>- get a class scroll (admin)"
+    - "<yellow>/skills set <class> [player]</yellow> <gray>- assign a class (admin)"
+    - "<yellow>/skills addxp <amount> [player]</yellow> <gray>- grant XP (admin)"
+    - "<yellow>/skills reload</yellow> <gray>- reload config and language (admin)"
+
+# Display names for classes (user-facing, MiniMessage).
+class-names:
+  example: "<gold>Vanguard</gold>"
+
+class:
+  none: "<gray>You have no class. Use a Scroll to choose one."
+  info: "<white>Class: <yellow><class></yellow> <gray>| Level <yellow><level></yellow> <gray>| XP <yellow><xp></yellow>/<yellow><next></yellow>"
+  assigned: "<green>You are now a <yellow><class></yellow>!"
+  removed: "<green>Your class has been removed."
+  unknown: "<red>No class with id <yellow><id></yellow>."
+  already: "<gray>You are already a <yellow><class></yellow>."
+  xp-added: "<green>Added <yellow><amount></yellow> XP."
+  level-up: "<gold>Level up! <yellow><class></yellow> is now level <yellow><level></yellow>."
+  max-level: "<gold>You have reached the maximum level."
+
+scroll:
+  received: "<green>You received a <yellow><class></yellow> scroll."
+  used: "<green>The scroll dissolves as you learn the <yellow><class></yellow> path."
+
+minigame:
+  unknown: "<red>No minigame with id <yellow><id></yellow>. Available: <list>."
+  already-running: "<red>You are already in a minigame."
+  starting: "<aqua>Minigame <yellow><game></yellow> starting..."
+  win: "<green>You won! Score: <yellow><score></yellow>."
+  lose: "<red>You lost. Score: <yellow><score></yellow>."
+  typing-prompt: "<aqua>Type this word: <yellow><word></yellow>"
+  typing-timeout: "<red>Too slow!"
+  clicking-prompt: "<aqua>Left-click as fast as you can for <yellow><seconds></yellow>s!"
+  clicking-progress: "<gray>Clicks: <yellow><clicks></yellow>/<target>"
+  rhythm-prompt: "<aqua>Hit <yellow>left-click</yellow> on every beat!"
+  rhythm-beat: "<gold>♪"
+  rhythm-hit: "<green>Perfect!"
+  rhythm-miss: "<red>Off-beat!"
+  sequence-prompt: "<aqua>Memorize the sequence, then repeat it by left-clicking."
+  sequence-show: "<yellow><sequence></yellow>"
+  sequence-your-turn: "<aqua>Your turn! Repeat the sequence."
+  sequence-wrong: "<red>Wrong! The sequence broke."

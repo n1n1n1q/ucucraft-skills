@@ -1,0 +1,57 @@
+# Українська локалізація. Формат MiniMessage. Плейсхолдери <name> надає код.
+
+general:
+  players-only: "<red>Цю команду можуть використовувати лише гравці."
+  no-permission: "<red>У вас немає прав на цю дію."
+  reloaded: "<green>Конфігурацію та мовні файли перезавантажено."
+  unknown-command: "<red>Невідома команда. Використайте <yellow>/skills help</yellow>."
+
+help:
+  header: "<gray>--- <white>Класи</white> ---"
+  entries:
+    - "<yellow>/skills help</yellow> <gray>- показати цю довідку"
+    - "<yellow>/skills class</yellow> <gray>- показати клас, рівень і досвід"
+    - "<yellow>/skills class remove</yellow> <gray>- забути клас"
+    - "<yellow>/skills minigame <id></yellow> <gray>- зіграти в міні-гру"
+    - "<yellow>/skills scroll [class]</yellow> <gray>- отримати сувій класу (адмін)"
+    - "<yellow>/skills set <class> [player]</yellow> <gray>- призначити клас (адмін)"
+    - "<yellow>/skills addxp <amount> [player]</yellow> <gray>- видати досвід (адмін)"
+    - "<yellow>/skills reload</yellow> <gray>- перезавантажити конфіг і мову (адмін)"
+
+# Відображувані назви класів (для гравців, MiniMessage).
+class-names:
+  example: "<gold>Авангард</gold>"
+
+class:
+  none: "<gray>У вас немає класу. Використайте Сувій, щоб обрати."
+  info: "<white>Клас: <yellow><class></yellow> <gray>| Рівень <yellow><level></yellow> <gray>| Досвід <yellow><xp></yellow>/<yellow><next></yellow>"
+  assigned: "<green>Тепер ви <yellow><class></yellow>!"
+  removed: "<green>Ваш клас знято."
+  unknown: "<red>Немає класу з id <yellow><id></yellow>."
+  already: "<gray>Ви вже <yellow><class></yellow>."
+  xp-added: "<green>Додано <yellow><amount></yellow> досвіду."
+  level-up: "<gold>Новий рівень! <yellow><class></yellow> тепер рівня <yellow><level></yellow>."
+  max-level: "<gold>Ви досягли максимального рівня."
+
+scroll:
+  received: "<green>Ви отримали сувій класу <yellow><class></yellow>."
+  used: "<green>Сувій розчиняється, і ви опановуєте шлях <yellow><class></yellow>."
+
+minigame:
+  unknown: "<red>Немає міні-гри з id <yellow><id></yellow>. Доступні: <list>."
+  already-running: "<red>Ви вже в міні-грі."
+  starting: "<aqua>Міні-гра <yellow><game></yellow> починається..."
+  win: "<green>Ви перемогли! Рахунок: <yellow><score></yellow>."
+  lose: "<red>Ви програли. Рахунок: <yellow><score></yellow>."
+  typing-prompt: "<aqua>Наберіть це слово: <yellow><word></yellow>"
+  typing-timeout: "<red>Занадто повільно!"
+  clicking-prompt: "<aqua>Клікайте лівою кнопкою якнайшвидше <yellow><seconds></yellow>с!"
+  clicking-progress: "<gray>Кліки: <yellow><clicks></yellow>/<target>"
+  rhythm-prompt: "<aqua>Клікайте <yellow>лівою кнопкою</yellow> в такт!"
+  rhythm-beat: "<gold>♪"
+  rhythm-hit: "<green>Точно!"
+  rhythm-miss: "<red>Повз ритм!"
+  sequence-prompt: "<aqua>Запам'ятайте послідовність і повторіть лівим кліком."
+  sequence-show: "<yellow><sequence></yellow>"
+  sequence-your-turn: "<aqua>Ваша черга! Повторіть послідовність."
+  sequence-wrong: "<red>Помилка! Послідовність перервано."
