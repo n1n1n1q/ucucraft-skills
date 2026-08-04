@@ -1,0 +1,13 @@
+# Debuff. Regular crafters roll these on iron/chainmail gear; a blacksmith can fix them.
+positive: false
+categories: [weapon, tool]
+tiers:
+  1:
+    name: "<dark_gray>Nicked</dark_gray>"
+    attributes:
+      attack_damage: -1.0
+  2:
+    name: "<dark_gray>Dull</dark_gray>"
+    attributes:
+      attack_damage: -2.0
+      attack_speed: -0.2

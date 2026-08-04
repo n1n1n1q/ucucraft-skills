@@ -1,0 +1,11 @@
+positive: false
+categories: [armor]
+tiers:
+  1:
+    name: "<dark_gray>Bulky</dark_gray>"
+    attributes:
+      movement_speed: -0.01
+  2:
+    name: "<dark_gray>Leaden</dark_gray>"
+    attributes:
+      movement_speed: -0.02

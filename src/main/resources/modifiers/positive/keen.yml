@@ -1,0 +1,22 @@
+# Positive weapon modifier. The 4 tiers are the "legendary levels" with proxy names.
+positive: true
+categories: [weapon]
+tiers:
+  1:
+    name: "<gray>Sharp</gray>"
+    attributes:
+      attack_damage: 1.0
+  2:
+    name: "<white>Keen</white>"
+    attributes:
+      attack_damage: 2.0
+  3:
+    name: "<aqua>Deadly</aqua>"
+    attributes:
+      attack_damage: 3.0
+      attack_speed: 0.2
+  4:
+    name: "<gold>Legendary</gold>"
+    attributes:
+      attack_damage: 5.0
+      attack_speed: 0.4

@@ -1,0 +1,21 @@
+positive: true
+categories: [tool]
+tiers:
+  1:
+    name: "<gray>Nimble</gray>"
+    attributes:
+      attack_speed: 0.1
+  2:
+    name: "<white>Precise</white>"
+    attributes:
+      attack_speed: 0.2
+  3:
+    name: "<aqua>Masterful</aqua>"
+    attributes:
+      attack_speed: 0.3
+      attack_damage: 1.0
+  4:
+    name: "<gold>Legendary</gold>"
+    attributes:
+      attack_speed: 0.4
+      attack_damage: 2.0

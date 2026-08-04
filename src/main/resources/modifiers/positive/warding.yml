@@ -1,0 +1,21 @@
+positive: true
+categories: [armor]
+tiers:
+  1:
+    name: "<gray>Guarded</gray>"
+    attributes:
+      max_health: 2.0
+  2:
+    name: "<white>Warding</white>"
+    attributes:
+      max_health: 4.0
+  3:
+    name: "<aqua>Shielding</aqua>"
+    attributes:
+      max_health: 6.0
+      knockback_resistance: 0.1
+  4:
+    name: "<gold>Aegis</gold>"
+    attributes:
+      max_health: 8.0
+      knockback_resistance: 0.2

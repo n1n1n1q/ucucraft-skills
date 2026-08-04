@@ -38,6 +38,7 @@ methods; none reaches into another's internals.
 | `classes` | `SkillClass`, `SkillClassRegistry`, `ClassManager` (assign/xp/level/bonuses), `BonusType`. |
 | `item` | `ScrollItem` (builds/identifies the scroll via PDC), `ScrollListener`. |
 | `minigame` | `Minigame`, `MinigameSession`, `MinigameResult`, `MinigameManager` + `games/`. |
+| `smithing` | Blacksmith crafting: `GearTier`/`GearType`, data-driven `Modifier`/`ModifierRegistry`/`ModifierService`/`ModifierRoller`, `HarderRecipes`, `RoseGold` (soft dep), `SmithingManager`. |
 | `command` | `SkillsCommand` — the single `/skills` entry point. |
 
 Persistence goes through `DataStore`; only `YamlDataStore` exists today. To add SQLite/MySQL,
@@ -56,6 +57,8 @@ visual-cue path gated on this bonus.
 - Add a minigame → `docs/adding-a-minigame.md`
 - Minigame catalogue & design → `docs/minigames.md`
 - Overall layout & data flow → `docs/architecture.md`
+- Blacksmith class & crafting gates → `docs/blacksmith.md`
+- Weapon/tool/armor modifiers (data-driven) → `docs/modifiers.md`
 
 ## Deliberately not done yet (next milestones)
 - Making the scroll obtainable (loot/crafting/villager trade).

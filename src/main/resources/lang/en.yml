@@ -22,6 +22,7 @@ help:
 # Display names for classes (user-facing, MiniMessage).
 class-names:
   example: "<gold>Vanguard</gold>"
+  blacksmith: "<gradient:#d98032:#f5c542>Blacksmith</gradient>"
 
 class:
   none: "<gray>You have no class. Use a Scroll to choose one."
@@ -37,6 +38,21 @@ class:
 scroll:
   received: "<green>You received a <yellow><class></yellow> scroll."
   used: "<green>The scroll dissolves as you learn the <yellow><class></yellow> path."
+
+# Blacksmith crafting / modifier system.
+smithing:
+  master-locked: "<red>Only a level <yellow><level></yellow> blacksmith can forge <yellow><tier></yellow> gear."
+  craft-one-at-a-time: "<red>Forge one piece at a time."
+  modifier-applied: "<green>Your work pays off — <name> <green>quality!"
+  no-modifier: "<gray>A clean piece — no special quality this time."
+  debuff-applied: "<red>Shoddy work — it came out <name><red>."
+  reroll-need-level: "<red>Rerolling needs a level <yellow><level></yellow> blacksmith."
+  reroll-limit: "<red>This item has been reforged the maximum <yellow><max></yellow> times."
+  reroll-done: "<green>Reforged into <name> <green>quality!"
+  fix-need-level: "<red>Fixing debuffs needs a level <yellow><level></yellow> blacksmith."
+  fix-done: "<green>You hammer out the flaws — the debuff is gone."
+  # Lore line shown on modified gear. <name> = proxy name, <tier> = star rating.
+  modifier-lore: "<gray><name> <dark_gray><tier>"
 
 minigame:
   unknown: "<red>No minigame with id <yellow><id></yellow>. Available: <list>."

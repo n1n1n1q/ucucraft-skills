@@ -34,6 +34,89 @@ classes:
     # Accessibility bonus: alternative visual cue strength (0 disables).
     # Compensates players who cannot rely on sound cues.
     visual-cue-level: 1
+  blacksmith:
+    # Small passive; the class's real power is the crafting gates below.
+    knockback-resistance-per-level: 0.0
+    # MUST stay > 0: the forge uses the sound-based rhythm minigame, so a deaf
+    # blacksmith needs the on-screen beat to compensate (see CLAUDE.md).
+    visual-cue-level: 1
+
+# Blacksmith crafting / Terraria-style modifier system.
+smithing:
+  enabled: true
+  # Gold, diamond and rose gold gear need a blacksmith of at least this level.
+  master-tiers:
+    min-level: 3
+  # Shift-right-click held gear to reroll (needs a modifier-free item) or fix a debuff.
+  reroll:
+    min-level: 2
+    max-rerolls: 5
+  fix:
+    min-level: 1
+  # Regular (non-blacksmith) crafters of iron/chainmail gear.
+  regular:
+    debuff-chance: 0.5
+    max-debuff-tier: 2
+  # Per-level luck. Level is the blacksmith's class level, clamped to 1..4.
+  # base-chance + hit-bonus * (hits / beats) = chance of ANY modifier; the rest is
+  # a clean item (no modifier, no debuff). tier-weights pick tier 1..max-tier.
+  levels:
+    1: { max-tier: 2, base-chance: 0.20, hit-bonus: 0.30, tier-weights: [72, 25, 3, 0] }
+    2: { max-tier: 2, base-chance: 0.30, hit-bonus: 0.35, tier-weights: [55, 35, 10, 0] }
+    3: { max-tier: 3, base-chance: 0.45, hit-bonus: 0.40, tier-weights: [40, 35, 20, 5] }
+    4: { max-tier: 4, base-chance: 0.60, hit-bonus: 0.45, tier-weights: [25, 35, 25, 15] }
+
+crafting:
+  # Detect ucucraft-items rose gold via its item-id PDC (soft dependency; no hard link).
+  rose-gold:
+    namespace: ucucraftitems
+    key: item_id
+    id-prefix: rose_gold
+  # Non-masters are forced onto these when crafting iron armor: one ingot (I) is swapped for a
+  # block (B) — "they tend to create shit". Blacksmiths keep the vanilla ingot recipes. Only pieces
+  # listed here are gated; remove one and that piece stays vanilla for everyone. I = IRON_INGOT,
+  # B = IRON_BLOCK.
+  harder-recipes:
+    iron_helmet:
+      enabled: true
+      result: { material: IRON_HELMET, amount: 1 }
+      shape:
+        - "IBI"
+        - "I I"
+        - "   "
+      ingredients:
+        I: IRON_INGOT
+        B: IRON_BLOCK
+    iron_chestplate:
+      enabled: true
+      result: { material: IRON_CHESTPLATE, amount: 1 }
+      shape:
+        - "I I"
+        - "IBI"
+        - "III"
+      ingredients:
+        I: IRON_INGOT
+        B: IRON_BLOCK
+    iron_leggings:
+      enabled: true
+      result: { material: IRON_LEGGINGS, amount: 1 }
+      shape:
+        - "IBI"
+        - "I I"
+        - "I I"
+      ingredients:
+        I: IRON_INGOT
+        B: IRON_BLOCK
+    iron_boots:
+      enabled: true
+      result: { material: IRON_BOOTS, amount: 1 }
+      shape:
+        - "I I"
+        - "IBI"
+        - "   "
+      ingredients:
+        I: IRON_INGOT
+        B: IRON_BLOCK
 
 minigames:
   speed-typing:

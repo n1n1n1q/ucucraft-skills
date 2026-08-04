@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /** Per-player run state. Holds one opaque state object owned by the minigame. */
 public final class MinigameSession {
@@ -13,12 +14,24 @@ public final class MinigameSession {
     private final Player player;
     private final Minigame game;
     private final List<Integer> tasks = new ArrayList<>();
+    private final Consumer<MinigameResult> onComplete;
     private Object state;
 
     public MinigameSession(MinigameManager manager, Player player, Minigame game) {
+        this(manager, player, game, null);
+    }
+
+    public MinigameSession(MinigameManager manager, Player player, Minigame game,
+                           Consumer<MinigameResult> onComplete) {
         this.manager = manager;
         this.player = player;
         this.game = game;
+        this.onComplete = onComplete;
+    }
+
+    /** Optional callback invoked with the result; when set, suppresses the default win/lose message. */
+    public Consumer<MinigameResult> onComplete() {
+        return onComplete;
     }
 
     public MinigameManager manager() {

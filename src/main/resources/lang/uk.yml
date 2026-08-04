@@ -21,6 +21,7 @@ help:
 # Відображувані назви класів (для гравців, MiniMessage).
 class-names:
   example: "<gold>Авангард</gold>"
+  blacksmith: "<gradient:#d98032:#f5c542>Ремісник</gradient>"
 
 class:
   none: "<gray>У вас немає класу. Використайте Сувій, щоб обрати."
@@ -36,6 +37,21 @@ class:
 scroll:
   received: "<green>Ви отримали сувій класу <yellow><class></yellow>."
   used: "<green>Сувій розчиняється, і ви опановуєте шлях <yellow><class></yellow>."
+
+# Ковальство / система модифікаторів.
+smithing:
+  master-locked: "<red>Лише ремісник <yellow><level></yellow> рівня може кувати <yellow><tier></yellow> спорядження."
+  craft-one-at-a-time: "<red>Куй по одному предмету за раз."
+  modifier-applied: "<green>Праця не марна — якість <name><green>!"
+  no-modifier: "<gray>Чистий виріб — цього разу без особливої якості."
+  debuff-applied: "<red>Недбала робота — вийшло <name><red>."
+  reroll-need-level: "<red>Перековка потребує ремісника <yellow><level></yellow> рівня."
+  reroll-limit: "<red>Цей предмет перековано максимальну кількість разів (<yellow><max></yellow>)."
+  reroll-done: "<green>Перековано в якість <name><green>!"
+  fix-need-level: "<red>Виправлення дефектів потребує ремісника <yellow><level></yellow> рівня."
+  fix-done: "<green>Ви вибиваєте вади — дебаф зникає."
+  # Рядок опису на модифікованому спорядженні. <name> = назва, <tier> = зірки.
+  modifier-lore: "<gray><name> <dark_gray><tier>"
 
 minigame:
   unknown: "<red>Немає міні-гри з id <yellow><id></yellow>. Доступні: <list>."

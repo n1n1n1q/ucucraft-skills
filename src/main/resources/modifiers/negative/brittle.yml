@@ -1,0 +1,12 @@
+positive: false
+categories: [armor]
+tiers:
+  1:
+    name: "<dark_gray>Cracked</dark_gray>"
+    attributes:
+      armor: -1.0
+  2:
+    name: "<dark_gray>Brittle</dark_gray>"
+    attributes:
+      armor: -2.0
+      armor_toughness: -1.0

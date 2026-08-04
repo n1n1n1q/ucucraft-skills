@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /** Registers minigames and routes input to the player's active session. */
 public final class MinigameManager implements Listener {
@@ -62,6 +63,14 @@ public final class MinigameManager implements Listener {
 
     /** Returns false only when no minigame has the given id. */
     public boolean start(Player player, String id) {
+        return start(player, id, null);
+    }
+
+    /**
+     * Starts a minigame; when {@code onComplete} is set it receives the result instead of the
+     * default win/lose message, letting a caller (e.g. the forge) react to the score.
+     */
+    public boolean start(Player player, String id, Consumer<MinigameResult> onComplete) {
         Minigame game = games.get(id.toLowerCase(Locale.ROOT));
         if (game == null) {
             return false;
@@ -70,7 +79,7 @@ public final class MinigameManager implements Listener {
             lang.send(player, "minigame.already-running");
             return true;
         }
-        MinigameSession session = new MinigameSession(this, player, game);
+        MinigameSession session = new MinigameSession(this, player, game, onComplete);
         active.put(player, session);
         lang.send(player, "minigame.starting", Map.of("game", game.id()));
         game.start(session);
@@ -82,6 +91,10 @@ public final class MinigameManager implements Listener {
             return;
         }
         session.cancelTasks();
+        if (session.onComplete() != null) {
+            session.onComplete().accept(result);
+            return;
+        }
         lang.send(session.player(), result.won() ? "minigame.win" : "minigame.lose",
                 Map.of("score", String.valueOf(result.score())));
     }

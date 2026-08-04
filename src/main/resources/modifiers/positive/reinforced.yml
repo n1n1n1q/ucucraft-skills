@@ -1,0 +1,21 @@
+positive: true
+categories: [armor]
+tiers:
+  1:
+    name: "<gray>Sturdy</gray>"
+    attributes:
+      armor: 1.0
+  2:
+    name: "<white>Reinforced</white>"
+    attributes:
+      armor: 2.0
+  3:
+    name: "<aqua>Fortified</aqua>"
+    attributes:
+      armor: 3.0
+      armor_toughness: 1.0
+  4:
+    name: "<gold>Impenetrable</gold>"
+    attributes:
+      armor: 4.0
+      armor_toughness: 2.0
