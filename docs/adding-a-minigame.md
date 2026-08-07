@@ -7,11 +7,12 @@ A minigame is a `Minigame` implementation registered in `MinigameManager`.
 - `start(session)` — set up state, message the player, schedule timers.
 - `onChat(session, message)` — chat input (already on the main thread). Optional.
 - `onClick(session)` — left-click input. Optional.
+- `onJump(session)` — jump (space) input. Optional.
 - Call `session.finish(MinigameResult.win(score))` / `.lose(score)` when done. `finish` cancels
   the session's tracked tasks and sends the win/lose message.
 
 The manager guarantees one active session per player and routes input to it. It cancels chat and
-left-click events while a session is active.
+left-click events while a session is active; jump events are routed but not cancelled.
 
 ## State & scheduling
 Store per-run data in `session.state(obj)` / `session.state()` — one opaque object owned by your

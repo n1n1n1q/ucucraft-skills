@@ -39,18 +39,19 @@ methods; none reaches into another's internals.
 | `item` | `ScrollItem` (builds/identifies the scroll via PDC), `ScrollListener`. |
 | `minigame` | `Minigame`, `MinigameSession`, `MinigameResult`, `MinigameManager` + `games/`. |
 | `smithing` | Blacksmith crafting: `GearTier`/`GearType`, data-driven `Modifier`/`ModifierRegistry`/`ModifierService`/`ModifierRoller`, `HarderRecipes`, `RoseGold` (soft dep), `SmithingManager`. |
+| `hunter` | Hunter (ranged): reuses the smithing modifier system for bows/crossbows via `HunterManager`; combat abilities in `HunterCombat`/`HunterCrossbow`; `GlowService`/`GlowPolicy` expose the highlight ability as a Bukkit service. |
+| `thief` | Thief (stealth): `ThiefManager` (lockpicking), `ThiefCombat` (fall/backstab), `ThiefPickpocket`, `ThiefSmoke`; soft-dep hooks `Lockpick` (ucucraft-items) and `CountriesHook` (Countries API). |
 | `command` | `SkillsCommand` — the single `/skills` entry point. |
 
 Persistence goes through `DataStore`; only `YamlDataStore` exists today. To add SQLite/MySQL,
 implement `DataStore` and swap the instance in `SkillsPlugin` — nothing else changes.
 
 ## Accessibility principle ("deaf players nerfed, skills compensate")
-Some mechanics use **sound cues** — today the rhythm minigame plays a beat sound. Hearing players
-get a natural edge. Classes expose an accessibility bonus (`BonusType.VISUAL_CUE`, config
-`classes.<id>.visual-cue-level`) that adds an on-screen equivalent so a non-hearing player can
-compensate through their class. `ClassManager#accessibilityCueLevel(player)` is the hook;
-`RhythmMinigame` reads it to show a visual beat. Keep new sound-based mechanics paired with a
-visual-cue path gated on this bonus.
+Prefer **visual** mechanics. The rhythm minigame is a fully visual timing bar (marker + green target
+on the action bar, pressed with space) — no hearing needed. When a mechanic *does* lean on a sound
+cue, pair it with an on-screen equivalent: classes expose an accessibility bonus (config
+`classes.<id>.visual-cue-level`, hook `ClassManager#accessibilityCueLevel(player)`) that a mechanic
+can read to add a visual cue a non-hearing player compensates through their class.
 
 ## Extending
 - Add a class → `docs/adding-a-class.md`
@@ -58,6 +59,8 @@ visual-cue path gated on this bonus.
 - Minigame catalogue & design → `docs/minigames.md`
 - Overall layout & data flow → `docs/architecture.md`
 - Blacksmith class & crafting gates → `docs/blacksmith.md`
+- Hunter class (bows/crossbows, ranged abilities, glow API) → `docs/hunter.md`
+- Thief class (lockpicking, backstab, pickpocket, smoke; Countries/items soft-deps) → `docs/thief.md`
 - Weapon/tool/armor modifiers (data-driven) → `docs/modifiers.md`
 
 ## Deliberately not done yet (next milestones)

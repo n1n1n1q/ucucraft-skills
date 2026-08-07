@@ -23,6 +23,8 @@ help:
 class-names:
   example: "<gold>Vanguard</gold>"
   blacksmith: "<gradient:#d98032:#f5c542>Blacksmith</gradient>"
+  hunter: "<gradient:#3a7d34:#8fd14f>Hunter</gradient>"
+  thief: "<gradient:#5a4b81:#9b8cc4>Thief</gradient>"
 
 class:
   none: "<gray>You have no class. Use a Scroll to choose one."
@@ -54,6 +56,36 @@ smithing:
   # Lore line shown on modified gear. <name> = proxy name, <tier> = star rating.
   modifier-lore: "<gray><name> <dark_gray><tier>"
 
+# Hunter bow/crossbow crafting and reforging.
+hunter:
+  craft-one-at-a-time: "<red>Craft one bow at a time."
+  modifier-applied: "<green>A fine draw — <name> <green>quality!"
+  no-modifier: "<gray>A plain bow — no special quality this time."
+  debuff-applied: "<red>Clumsy work — it came out <name><red>."
+  reroll-need-level: "<red>Reforging bows needs a level <yellow><level></yellow> hunter."
+  reroll-need-materials: "<red>You need <yellow><cost></yellow> to reforge this at the archer table."
+  reroll-limit: "<red>This bow has been reforged the maximum <yellow><max></yellow> times."
+  reroll-done: "<green>Reforged into <name> <green>quality! <gray>(<yellow><left></yellow> left)"
+
+# Thief abilities.
+thief:
+  lockpick-not-thief: "<red>You don't know how to use a lockpick."
+  lockpick-no-target: "<gray>There's no one here worth stealing from."
+  lockpick-cooldown: "<red>Your hands are still shaking — wait <yellow><seconds></yellow>s."
+  lockpick-failed: "<red>The lock holds. Your pick slips."
+  lockpick-success: "<green>The lock clicks open."
+  lockpick-unavailable: "<red>Your lockpick won't budge right now."
+  pickpocket-cooldown: "<red>Too soon — wait <yellow><seconds></yellow>s."
+  pickpocket-unavailable: "<red>You can't focus on their pockets right now."
+  pickpocket-menu-title: "Pickpocketing <player>"
+  pickpocket-failed: "<red>Your fingers come up empty."
+  pickpocket-empty: "<gray>They have nothing to take."
+  pickpocket-success: "<green>You lift <yellow><amount></yellow>x <white><item></white>."
+  pickpocket-caught: "<red><thief> just tried to pickpocket you!"
+  pickpocket-victim: "<red>You feel lighter — something is missing."
+  smoke-deployed: "<dark_gray>You vanish in a cloud of smoke."
+  smoke-cooldown: "<red>Your smoke bomb isn't ready — wait <yellow><seconds></yellow>s."
+
 minigame:
   unknown: "<red>No minigame with id <yellow><id></yellow>. Available: <list>."
   already-running: "<red>You are already in a minigame."
@@ -64,8 +96,7 @@ minigame:
   typing-timeout: "<red>Too slow!"
   clicking-prompt: "<aqua>Left-click as fast as you can for <yellow><seconds></yellow>s!"
   clicking-progress: "<gray>Clicks: <yellow><clicks></yellow>/<target>"
-  rhythm-prompt: "<aqua>Hit <yellow>left-click</yellow> on every beat!"
-  rhythm-beat: "<gold>♪"
+  rhythm-prompt: "<aqua>Press <yellow>SPACE</yellow> when the marker is on the green zone!"
   rhythm-hit: "<green>Perfect!"
   rhythm-miss: "<red>Off-beat!"
   sequence-prompt: "<aqua>Memorize the sequence, then repeat it by left-clicking."

@@ -1,0 +1,21 @@
+# Positive bow/crossbow modifier focused on arrow damage. attack_damage is added to arrow damage
+# by the hunter's combat listener.
+positive: true
+categories: [bow]
+tiers:
+  1:
+    name: "<gray>Sharp</gray>"
+    attributes:
+      attack_damage: 1.0
+  2:
+    name: "<white>Deadly</white>"
+    attributes:
+      attack_damage: 2.5
+  3:
+    name: "<aqua>Murderous</aqua>"
+    attributes:
+      attack_damage: 4.0
+  4:
+    name: "<gold>Godly</gold>"
+    attributes:
+      attack_damage: 6.0

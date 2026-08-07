@@ -87,6 +87,17 @@ public final class ModifierService {
         return read(item, idKey, PersistentDataType.STRING) != null;
     }
 
+    /** The stored modifier id, or null if the item carries none. */
+    public String modifierId(ItemStack item) {
+        return read(item, idKey, PersistentDataType.STRING);
+    }
+
+    /** The stored modifier tier, or 0 if the item carries none. */
+    public int modifierTier(ItemStack item) {
+        Integer tier = read(item, tierKey, PersistentDataType.INTEGER);
+        return tier == null ? 0 : tier;
+    }
+
     public boolean isDebuff(ItemStack item) {
         Boolean debuff = read(item, debuffKey, PersistentDataType.BOOLEAN);
         return debuff != null && debuff;

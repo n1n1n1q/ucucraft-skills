@@ -13,8 +13,8 @@ under `minigame:` in `lang/*.yml`.
 |---|---|---|---|
 | `typing` | chat | Type the shown word before the timer ends. | `minigames.speed-typing` |
 | `clicking` | left-click | Reach the click target before time runs out. | `minigames.speed-clicking` |
-| `rhythm` | left-click | Hit each beat within tolerance. Uses **sound**. | `minigames.rhythm` |
-| `sequence` | chat | Repeat a growing number sequence. | `minigames.sequence-memory` |
+| `rhythm` | space | Stop the sweeping marker on the target zone. Fully **visual**. | `minigames.rhythm` |
+| `sequence` | chat | Repeat a growing number sequence (shown as a title). | `minigames.sequence-memory` |
 
 ### typing
 Picks a random word from `words`, prompts, and starts a `duration-seconds` timer. Correct chat →
@@ -25,14 +25,14 @@ Counts left-clicks for `duration-seconds`, showing progress on the action bar. W
 `target-clicks`.
 
 ### rhythm
-Plays `beats` beats `beat-interval-ms` apart using `sound`. A click within `tolerance-ms` of a
-beat scores a hit; win needs ≥60% hits. Because the beat is audio, players with a class
-accessibility bonus (`visual-cue-level > 0`) also see an on-screen beat — see the accessibility
-note in [CLAUDE.md](../CLAUDE.md).
+An on-screen bar (`track-width` cells) with a green target zone; a marker sweeps across it, one cell
+every `marker-speed-ticks` ticks, shown on the action bar. Press **space** while the marker is on the
+target to score a hit; each pass is one round and there are `beats` rounds. Win needs ≥60% hits. Fully
+visual — the optional `sound` only adds hit/miss feedback.
 
 ### sequence
-Shows a sequence of `start-length` numbers (1–4); type it back to grow it by one, up to
-`max-length`. A wrong entry ends the run.
+Shows a sequence of `start-length` numbers (1–4) as an on-screen **title** for `show-ms`; type it back
+to grow it by one, up to `max-length`. A wrong entry ends the run.
 
 ## Design intent
 Minigames exist to **revamp regular mechanics** — mining, fishing, combat, enchanting, etc. —

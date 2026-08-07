@@ -28,12 +28,25 @@ public final class ModifierRoller {
 
     /** Positive roll for a blacksmith. Empty means "no modifier, but no debuff either". */
     public Optional<Roll> rollPositive(int level, int hits, int maxHits, GearType type) {
+        return rollPositive("smithing", level, hits, maxHits, type);
+    }
+
+    /** Positive roll with no minigame component (level-only odds), reading {@code <base>.levels}. */
+    public Optional<Roll> rollPositive(String base, int level, GearType type) {
+        return rollPositive(base, level, 0, 1, type);
+    }
+
+    /**
+     * Positive roll reading odds from {@code <base>.levels.<1..4>}, letting different classes
+     * (smithing, hunter) share the logic with their own tuning. Empty means "no modifier".
+     */
+    public Optional<Roll> rollPositive(String base, int level, int hits, int maxHits, GearType type) {
         List<Modifier> pool = registry.positivesFor(type);
         if (pool.isEmpty()) {
             return Optional.empty();
         }
         ConfigurationSection cfg = config.raw().getConfigurationSection(
-                "smithing.levels." + Math.max(1, Math.min(4, level)));
+                base + ".levels." + Math.max(1, Math.min(4, level)));
         if (cfg == null) {
             return Optional.empty();
         }
@@ -58,7 +71,12 @@ public final class ModifierRoller {
 
     /** Debuff roll for a regular crafter; empty when the debuff chance is not met. */
     public Optional<Roll> rollDebuff(GearType type) {
-        double chance = config.raw().getDouble("smithing.regular.debuff-chance", 0.5);
+        return rollDebuff("smithing", type);
+    }
+
+    /** Debuff roll reading {@code <base>.regular.*}; empty when the debuff chance is not met. */
+    public Optional<Roll> rollDebuff(String base, GearType type) {
+        double chance = config.raw().getDouble(base + ".regular.debuff-chance", 0.5);
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
         if (rnd.nextDouble() > chance) {
             return Optional.empty();
@@ -68,7 +86,7 @@ public final class ModifierRoller {
             return Optional.empty();
         }
         Modifier modifier = pool.get(rnd.nextInt(pool.size()));
-        int maxDebuffTier = Math.min(config.raw().getInt("smithing.regular.max-debuff-tier", 2), modifier.maxTier());
+        int maxDebuffTier = Math.min(config.raw().getInt(base + ".regular.max-debuff-tier", 2), modifier.maxTier());
         int tier = 1 + rnd.nextInt(Math.max(1, maxDebuffTier));
         return Optional.of(new Roll(modifier, tier));
     }

@@ -26,12 +26,11 @@ that plugin is absent nothing rose-gold ever matches.
 
 There is no bench block: whenever a blacksmith crafts iron+ gear, a **rhythm minigame** runs (the
 existing [`RhythmMinigame`](../src/main/java/com/ucucraft/skills/minigame/games/RhythmMinigame.java)
-via a result callback). The number of beat hits, plus the blacksmith's level, decides the modifier —
-see [`ModifierRoller`](../src/main/java/com/ucucraft/skills/smithing/ModifierRoller.java) and
-`smithing.levels.<1..4>` in config. Level 1 usually yields a clean item (no modifier, no debuff);
-higher levels unlock higher tiers and better odds. Because the beat is a **sound**, the blacksmith's
-`classes.blacksmith.visual-cue-level` must stay > 0 (accessibility rule, see
-[CLAUDE.md](../CLAUDE.md)).
+via a result callback). The number of timing-bar hits, plus the blacksmith's level, decides the
+modifier — see [`ModifierRoller`](../src/main/java/com/ucucraft/skills/smithing/ModifierRoller.java)
+and `smithing.levels.<1..4>` in config. Level 1 usually yields a clean item (no modifier, no debuff);
+higher levels unlock higher tiers and better odds. The rhythm minigame is fully visual (a marker on a
+bar, pressed with space), so it needs no accessibility compensation.
 
 Shift-click crafting of gated gear is blocked ("forge one at a time") so each piece gets its own roll.
 

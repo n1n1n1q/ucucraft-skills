@@ -37,8 +37,14 @@ classes:
   blacksmith:
     # Small passive; the class's real power is the crafting gates below.
     knockback-resistance-per-level: 0.0
-    # MUST stay > 0: the forge uses the sound-based rhythm minigame, so a deaf
-    # blacksmith needs the on-screen beat to compensate (see CLAUDE.md).
+    # Accessibility bonus (0 disables). The forge's rhythm minigame is fully visual now, but this
+    # stays as the hook for any sound-based cue a class should compensate for (see CLAUDE.md).
+    visual-cue-level: 1
+  hunter:
+    # Small passive movement speed per level (added to the 0.1 vanilla base).
+    movement-speed-per-level: 0.0
+    # Accessibility bonus (0 disables). The level-2 slow arrow plays a sound cue; a non-hearing
+    # hunter can compensate through this. Hunter crafting/reforging has no minigame.
     visual-cue-level: 1
 
 # Blacksmith crafting / Terraria-style modifier system.
@@ -65,6 +71,122 @@ smithing:
     2: { max-tier: 2, base-chance: 0.30, hit-bonus: 0.35, tier-weights: [55, 35, 10, 0] }
     3: { max-tier: 3, base-chance: 0.45, hit-bonus: 0.40, tier-weights: [40, 35, 20, 5] }
     4: { max-tier: 4, base-chance: 0.60, hit-bonus: 0.45, tier-weights: [25, 35, 25, 15] }
+
+# Hunter: bow/crossbow crafting modifiers + per-level ranged abilities.
+hunter:
+  enabled: true
+  # Block used as the "archer table" for reforging bows (right-click it holding a bow).
+  table-material: FLETCHING_TABLE
+  # Reforge a bow at the archer table. Runs the rhythm minigame; odds scale with level below.
+  reroll:
+    min-level: 1
+    max-rerolls: 5           # "durability" of remodifications, tracked per item
+    # Materials consumed per reroll. "MATERIAL:amount".
+    cost:
+      - "STRING:2"
+      - "FEATHER:1"
+  # Regular (non-hunter) crafters of bows/crossbows.
+  regular:
+    debuff-chance: 0.5
+    max-debuff-tier: 2
+  # Per-level luck for a hunter's bow crafts/reforges (same shape as smithing.levels).
+  levels:
+    1: { max-tier: 2, base-chance: 0.20, hit-bonus: 0.30, tier-weights: [72, 25, 3, 0] }
+    2: { max-tier: 2, base-chance: 0.30, hit-bonus: 0.35, tier-weights: [55, 35, 10, 0] }
+    3: { max-tier: 3, base-chance: 0.45, hit-bonus: 0.40, tier-weights: [40, 35, 20, 5] }
+    4: { max-tier: 4, base-chance: 0.60, hit-bonus: 0.45, tier-weights: [25, 35, 25, 15] }
+  # Level 2 "slow arrow": a chance on each shot for extra damage + slowness, with cue + trail.
+  arrow-slow:
+    min-level: 2
+    chance: 0.2
+    damage-multiplier: 1.5
+    slowness-seconds: 4
+    slowness-amplifier: 1
+    sound: "minecraft:block.glass.break"
+    particle: SNOWFLAKE
+  # Level 2 "highlight prey": sneak + right-click a bow to glow nearby mobs (and mark them as prey).
+  highlight:
+    min-level: 2
+    radius: 16
+    duration-seconds: 6
+    cooldown-seconds: 8
+    sound: "minecraft:entity.fox.sniff"
+  # Level 3 crossbow mastery.
+  crossbow:
+    min-level: 3
+    keep-loaded-chance: 0.25   # chance the crossbow stays loaded after firing
+    quick-charge-level: 2      # passive faster reload while holding a crossbow (0 disables)
+  # Level 4 consecutive-hit damage stacking.
+  stacking:
+    min-level: 4
+    window-seconds: 4
+    damage-per-stack: 1.0
+    max-bonus: 6.0
+  # Level 4 reward for killing highlighted prey.
+  marked-kill:
+    min-level: 4
+    speed-seconds: 5
+    speed-amplifier: 1
+    regen-seconds: 5
+    regen-amplifier: 1
+    sound: "minecraft:entity.player.levelup"
+    particle: TOTEM_OF_UNDYING
+
+# Thief: lockpicking + stealth abilities. Uses the Countries and ucucraft-items plugins when present.
+thief:
+  enabled: true
+  # Level 1: right-click a container with a lockpick to break in.
+  lockpick:
+    # Soft-dep identity of ucucraft-items' lockpick (its item-id PDC).
+    namespace: ucucraftitems
+    key: item_id
+    id: lockpick
+    # Only allow stealing when the chunk holds members of the owning country (Countries plugin).
+    # When Countries is absent this check is skipped (any container is pickable).
+    require-country-members: true
+    # Minigame run to pick the lock; must be a registered minigame id
+    # (typing | clicking | rhythm | sequence).
+    minigame: sequence
+    # Easier difficulty just for lockpicking — overrides the chosen minigame's own settings. Keys
+    # match the picked minigame; these defaults suit "sequence" (a short 2->3 memory, shown longer).
+    difficulty:
+      start-length: 2
+      max-length: 3
+      show-ms: 1500
+    # A LOUD sound plays at the start and end of lockpicking — the theft is meant to be risky.
+    sound: "minecraft:block.chain.break"
+    sound-volume: 4.0
+    cooldown-seconds: 0
+  # Level 2: fall control + backstab.
+  fall:
+    min-level: 2
+    max-blocks: 15.0        # sneaking negates fall damage for falls up to this height
+  backstab:
+    min-level: 2
+    multiplier: 1.5         # damage multiplier for a sneaking hit from behind
+    rear-threshold: 0.2     # how far into the target's rear arc the attacker must be (0..1)
+  # Level 3: pickpocket a nearby player. Success is decided by a minigame, not luck; on success the
+  # thief picks one of a few random items from a menu, which is dropped to them.
+  pickpocket:
+    min-level: 3
+    minigame: typing        # registered minigame id (typing | clicking | rhythm | sequence)
+    choices: 5              # random victim items offered in the selection menu
+    amount: 1               # size of the chosen stack that is taken
+    cooldown-seconds: 10
+    alert-on-fail: true     # tell the victim when a pickpocket fails
+    alert-victim: true      # tell the victim when a pickpocket succeeds
+  # Level 4: Smoke Screen (sneak + swap-hand / F).
+  smoke:
+    min-level: 4
+    cooldown-seconds: 30
+    radius: 6
+    particle: CAMPFIRE_SIGNAL_SMOKE
+    particle-count: 120
+    sound: "minecraft:entity.tnt.primed"
+    blindness-seconds: 4
+    self-speed-seconds: 5
+    self-speed-amplifier: 1   # amplifier 1 = Speed II
+    invisibility-seconds: 5
 
 crafting:
   # Detect ucucraft-items rose gold via its item-id PDC (soft dependency; no hard link).
@@ -126,12 +248,11 @@ minigames:
     duration-seconds: 5
     target-clicks: 30
   rhythm:
-    # Milliseconds between beats and the hit tolerance window.
-    beat-interval-ms: 800
-    tolerance-ms: 200
-    beats: 8
-    # Sound played on each beat (deaf players are disadvantaged here by design).
-    # Namespaced sound key.
+    # A marker sweeps an on-screen bar; press SPACE when it's on the green target zone.
+    beats: 8               # number of passes/rounds (also the forge's max "hits")
+    marker-speed-ticks: 2  # ticks per marker step (lower = faster/harder)
+    track-width: 21        # width of the bar in cells
+    # Optional feedback sound on hit/miss (leave blank to disable). Purely visual otherwise.
     sound: "minecraft:block.note_block.pling"
   sequence-memory:
     start-length: 3

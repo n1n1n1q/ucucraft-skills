@@ -16,6 +16,9 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$paperApiVersion")
+    // Soft dependency: the Countries API (thief lockpicking). Provided at runtime by the Countries
+    // plugin; compiled against the bundled api jar only. ucucraft-items is a pure PDC soft-dep.
+    compileOnly(files("libs/countries-1.0.0.jar"))
 }
 
 java {

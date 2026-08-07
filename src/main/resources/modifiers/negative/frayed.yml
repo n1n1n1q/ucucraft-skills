@@ -1,0 +1,14 @@
+# Bow/crossbow debuff. Regular players roll these when crafting a bow/crossbow; a hunter reforges
+# them away at the archer table.
+positive: false
+categories: [bow]
+tiers:
+  1:
+    name: "<dark_gray>Frayed</dark_gray>"
+    attributes:
+      attack_damage: -1.0
+  2:
+    name: "<dark_gray>Warped</dark_gray>"
+    attributes:
+      movement_speed: -0.02
+      attack_damage: -2.0

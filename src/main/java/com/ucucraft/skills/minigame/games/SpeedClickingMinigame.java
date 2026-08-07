@@ -17,8 +17,7 @@ public final class SpeedClickingMinigame implements Minigame {
 
     @Override
     public void start(MinigameSession session) {
-        ConfigurationSection cfg = session.manager().config().raw()
-                .getConfigurationSection("minigames.speed-clicking");
+        ConfigurationSection cfg = session.config("minigames.speed-clicking");
         int target = cfg != null ? cfg.getInt("target-clicks", 30) : 30;
         int duration = cfg != null ? cfg.getInt("duration-seconds", 5) : 5;
 

@@ -19,8 +19,7 @@ public final class SpeedTypingMinigame implements Minigame {
 
     @Override
     public void start(MinigameSession session) {
-        ConfigurationSection cfg = session.manager().config().raw()
-                .getConfigurationSection("minigames.speed-typing");
+        ConfigurationSection cfg = session.config("minigames.speed-typing");
         List<String> words = cfg != null ? cfg.getStringList("words") : List.of();
         int duration = cfg != null ? cfg.getInt("duration-seconds", 10) : 10;
         String word = words.isEmpty() ? "redstone"

@@ -1,0 +1,24 @@
+# Positive bow/crossbow modifier. attack_damage is read by the hunter as bonus arrow damage;
+# movement_speed applies while the bow is held. The 4 tiers are the "legendary levels".
+positive: true
+categories: [bow]
+tiers:
+  1:
+    name: "<gray>Quick</gray>"
+    attributes:
+      movement_speed: 0.01
+  2:
+    name: "<white>Rapid</white>"
+    attributes:
+      movement_speed: 0.02
+      attack_damage: 1.0
+  3:
+    name: "<aqua>Swift</aqua>"
+    attributes:
+      movement_speed: 0.03
+      attack_damage: 2.0
+  4:
+    name: "<gold>Unreal</gold>"
+    attributes:
+      movement_speed: 0.04
+      attack_damage: 3.0

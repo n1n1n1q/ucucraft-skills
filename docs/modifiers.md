@@ -1,6 +1,6 @@
 # Modifiers
 
-Weapon/tool/armor modifiers are data, not code. They live as one YAML file per modifier under
+Weapon/tool/armor/bow modifiers are data, not code. They live as one YAML file per modifier under
 two directories in the plugin data folder:
 
 ```
@@ -20,7 +20,7 @@ with a **proxy name** (the prefix shown on the item) and attribute deltas.
 ```yaml
 # modifiers/positive/keen.yml
 positive: true                 # optional; defaults to the directory (positive/ vs negative/)
-categories: [weapon]           # weapon | tool | armor (one or more)
+categories: [weapon]           # weapon | tool | armor | bow (one or more)
 tiers:
   1: { name: "<gray>Sharp</gray>",     attributes: { attack_damage: 1.0 } }
   2: { name: "<white>Keen</white>",    attributes: { attack_damage: 2.0 } }

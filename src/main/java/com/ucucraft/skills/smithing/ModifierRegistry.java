@@ -29,9 +29,12 @@ public final class ModifierRegistry {
             "modifiers/positive/reinforced.yml",
             "modifiers/positive/warding.yml",
             "modifiers/positive/precise.yml",
+            "modifiers/positive/rapid.yml",
+            "modifiers/positive/hawkeye.yml",
             "modifiers/negative/dull.yml",
             "modifiers/negative/brittle.yml",
             "modifiers/negative/heavy.yml",
+            "modifiers/negative/frayed.yml",
     };
 
     private final Plugin plugin;

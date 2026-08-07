@@ -9,7 +9,8 @@ import java.util.Locale;
 public enum GearType {
     WEAPON(EquipmentSlotGroup.HAND),
     TOOL(EquipmentSlotGroup.HAND),
-    ARMOR(EquipmentSlotGroup.ARMOR);
+    ARMOR(EquipmentSlotGroup.ARMOR),
+    BOW(EquipmentSlotGroup.HAND);
 
     private final EquipmentSlotGroup slotGroup;
 
@@ -27,6 +28,9 @@ public enum GearType {
             return null;
         }
         String name = material.name().toUpperCase(Locale.ROOT);
+        if (name.equals("BOW") || name.equals("CROSSBOW")) {
+            return BOW;
+        }
         if (name.endsWith("_SWORD") || name.equals("TRIDENT") || name.endsWith("_AXE")) {
             // Axes double as weapons; treated as weapons so damage modifiers make sense.
             return name.endsWith("_AXE") ? TOOL : WEAPON;

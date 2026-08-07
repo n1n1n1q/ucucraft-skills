@@ -18,4 +18,8 @@ public interface Minigame {
     /** Left-click input. */
     default void onClick(MinigameSession session) {
     }
+
+    /** Jump (space) input. */
+    default void onJump(MinigameSession session) {
+    }
 }

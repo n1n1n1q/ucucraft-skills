@@ -4,6 +4,8 @@ main: com.ucucraft.skills.SkillsPlugin
 api-version: '1.21'
 authors: [ucucraft]
 description: Classes/specialties, level progression and minigames.
+# Optional integrations. The plugin runs without them; thief lockpicking uses both when present.
+softdepend: [Countries, UcucraftItems]
 
 commands:
   skills:

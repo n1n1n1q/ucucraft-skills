@@ -4,6 +4,7 @@ import com.ucucraft.skills.SkillsPlugin;
 import com.ucucraft.skills.classes.ClassManager;
 import com.ucucraft.skills.config.ConfigManager;
 import com.ucucraft.skills.lang.LangManager;
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
@@ -71,6 +72,16 @@ public final class MinigameManager implements Listener {
      * default win/lose message, letting a caller (e.g. the forge) react to the score.
      */
     public boolean start(Player player, String id, Consumer<MinigameResult> onComplete) {
+        return start(player, id, onComplete, null);
+    }
+
+    /**
+     * Starts a minigame with optional per-run difficulty overrides ({@code settings}); a game reads
+     * its config from there instead of its global {@code minigames.<id>} section (see
+     * {@link MinigameSession#config}).
+     */
+    public boolean start(Player player, String id, Consumer<MinigameResult> onComplete,
+                         org.bukkit.configuration.ConfigurationSection settings) {
         Minigame game = games.get(id.toLowerCase(Locale.ROOT));
         if (game == null) {
             return false;
@@ -79,7 +90,7 @@ public final class MinigameManager implements Listener {
             lang.send(player, "minigame.already-running");
             return true;
         }
-        MinigameSession session = new MinigameSession(this, player, game, onComplete);
+        MinigameSession session = new MinigameSession(this, player, game, onComplete, settings);
         active.put(player, session);
         lang.send(player, "minigame.starting", Map.of("game", game.id()));
         game.start(session);
@@ -122,6 +133,14 @@ public final class MinigameManager implements Listener {
         }
         event.setCancelled(true);
         session.game().onClick(session);
+    }
+
+    @EventHandler
+    public void onJump(PlayerJumpEvent event) {
+        MinigameSession session = active.get(event.getPlayer());
+        if (session != null) {
+            session.game().onJump(session);
+        }
     }
 
     @EventHandler

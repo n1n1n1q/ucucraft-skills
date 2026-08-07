@@ -22,6 +22,8 @@ help:
 class-names:
   example: "<gold>Авангард</gold>"
   blacksmith: "<gradient:#d98032:#f5c542>Ремісник</gradient>"
+  hunter: "<gradient:#3a7d34:#8fd14f>Мисливець</gradient>"
+  thief: "<gradient:#5a4b81:#9b8cc4>Злодій</gradient>"
 
 class:
   none: "<gray>У вас немає класу. Використайте Сувій, щоб обрати."
@@ -53,6 +55,36 @@ smithing:
   # Рядок опису на модифікованому спорядженні. <name> = назва, <tier> = зірки.
   modifier-lore: "<gray><name> <dark_gray><tier>"
 
+# Крафт і перековка луків/арбалетів мисливцем.
+hunter:
+  craft-one-at-a-time: "<red>Роби по одному луку за раз."
+  modifier-applied: "<green>Влучний постріл — якість <name><green>!"
+  no-modifier: "<gray>Звичайний лук — цього разу без особливої якості."
+  debuff-applied: "<red>Незграбна робота — вийшло <name><red>."
+  reroll-need-level: "<red>Перековка луків потребує мисливця <yellow><level></yellow> рівня."
+  reroll-need-materials: "<red>Потрібно <yellow><cost></yellow>, щоб перекувати це за столом лучника."
+  reroll-limit: "<red>Цей лук перековано максимальну кількість разів (<yellow><max></yellow>)."
+  reroll-done: "<green>Перековано в якість <name> <green>! <gray>(залишилось <yellow><left></yellow>)"
+
+# Здібності злодія.
+thief:
+  lockpick-not-thief: "<red>Ви не вмієте користуватися відмичкою."
+  lockpick-no-target: "<gray>Тут немає в кого красти."
+  lockpick-cooldown: "<red>Руки ще тремтять — зачекайте <yellow><seconds></yellow>с."
+  lockpick-failed: "<red>Замок не піддається. Відмичка зісковзує."
+  lockpick-success: "<green>Замок клацає і відчиняється."
+  lockpick-unavailable: "<red>Відмичка зараз не діє."
+  pickpocket-cooldown: "<red>Занадто рано — зачекайте <yellow><seconds></yellow>с."
+  pickpocket-unavailable: "<red>Зараз не вдається зосередитись на їхніх кишенях."
+  pickpocket-menu-title: "Обкрадання <player>"
+  pickpocket-failed: "<red>Ваші пальці лишились ні з чим."
+  pickpocket-empty: "<gray>У них нічого взяти."
+  pickpocket-success: "<green>Ви поцупили <yellow><amount></yellow>x <white><item></white>."
+  pickpocket-caught: "<red><thief> щойно намагався вас обікрасти!"
+  pickpocket-victim: "<red>Вам полегшало — щось зникло."
+  smoke-deployed: "<dark_gray>Ви зникаєте в хмарі диму."
+  smoke-cooldown: "<red>Димова бомба ще не готова — зачекайте <yellow><seconds></yellow>с."
+
 minigame:
   unknown: "<red>Немає міні-гри з id <yellow><id></yellow>. Доступні: <list>."
   already-running: "<red>Ви вже в міні-грі."
@@ -63,8 +95,7 @@ minigame:
   typing-timeout: "<red>Занадто повільно!"
   clicking-prompt: "<aqua>Клікайте лівою кнопкою якнайшвидше <yellow><seconds></yellow>с!"
   clicking-progress: "<gray>Кліки: <yellow><clicks></yellow>/<target>"
-  rhythm-prompt: "<aqua>Клікайте <yellow>лівою кнопкою</yellow> в такт!"
-  rhythm-beat: "<gold>♪"
+  rhythm-prompt: "<aqua>Натисніть <yellow>ПРОБІЛ</yellow>, коли позначка на зеленій зоні!"
   rhythm-hit: "<green>Точно!"
   rhythm-miss: "<red>Повз ритм!"
   sequence-prompt: "<aqua>Запам'ятайте послідовність і повторіть лівим кліком."
