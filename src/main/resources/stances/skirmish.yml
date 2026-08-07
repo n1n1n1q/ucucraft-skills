@@ -1,0 +1,42 @@
+# Натиск — hit and run. Fast and always critical on the charge, but fragile and useless crouched.
+id: skirmish
+name: "<color:#3FA34D>Натиск</color>"
+icon: LEATHER_BOOTS
+applies-to: [SWORD, AXE]
+min-level: 2
+
+attributes:
+  movement_speed: 0.02
+  armor_toughness: -2.0
+
+charged:
+  movement_speed: 0.01
+
+combat:
+  glance-chance: 0.05
+  parry-chance: 0.10
+
+effects:
+  sprint-crit: true
+  sprint-crit-multiplier: 1.5
+  # The trade: crouching switches the whole stance off until you stand up again.
+  no-bonus-while-sneaking: true
+
+particles:
+  particle: DUST
+  color: "#3FA34D"
+  shape: TRAIL
+  count: 5
+  size: 0.9
+
+# Ривок: you and your allies get Speed and cannot be knocked back; your next hit stuns.
+warcry:
+  id: dash
+  duration-seconds: 6
+  self-effects:
+    speed: 2
+  ally-effects:
+    speed: 2
+  buff-attributes:
+    knockback_resistance: 1.0
+  traits: [STUN_NEXT_HIT]

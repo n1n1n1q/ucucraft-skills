@@ -1,0 +1,42 @@
+# Оборона — the wall. Highest parry chance in the game, bought with damage and speed.
+id: guard
+name: "<color:#4A6FA5>Оборона</color>"
+icon: SHIELD
+applies-to: [MELEE]
+min-level: 1
+
+attributes:
+  armor: 4.0
+  knockback_resistance: 0.4
+  attack_damage: -1.5
+  movement_speed: -0.01
+
+charged:
+  armor: 2.0
+
+combat:
+  parry-chance: 0.25
+  stun-chance: 0.10
+
+effects:
+  # The stun is a shield bash: it only lands while a shield is in hand.
+  stun-requires-shield: true
+  # Стійте!: ally effect amplifiers scale off your armour, one step per this much armour.
+  cry-scale-with-armor: true
+  armor-per-amplifier: 8
+
+particles:
+  particle: DUST
+  color: "#4A6FA5"
+  shape: ORBIT
+  count: 4
+  size: 1.1
+
+# Стійте!: allies harden, hostiles turn on you.
+warcry:
+  id: hold
+  duration-seconds: 8
+  ally-effects:
+    resistance: 0
+    absorption: 1
+  traits: [TAUNT]

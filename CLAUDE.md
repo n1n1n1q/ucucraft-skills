@@ -41,6 +41,7 @@ methods; none reaches into another's internals.
 | `smithing` | Blacksmith crafting: `GearTier`/`GearType`, data-driven `Modifier`/`ModifierRegistry`/`ModifierService`/`ModifierRoller`, `HarderRecipes`, `RoseGold` (soft dep), `SmithingManager`. |
 | `hunter` | Hunter (ranged): reuses the smithing modifier system for bows/crossbows via `HunterManager`; combat abilities in `HunterCombat`/`HunterCrossbow`; `GlowService`/`GlowPolicy` expose the highlight ability as a Bukkit service. |
 | `thief` | Thief (stealth): `ThiefManager` (lockpicking), `ThiefCombat` (fall/backstab), `ThiefPickpocket`, `ThiefSmoke`; soft-dep hooks `Lockpick` (ucucraft-items) and `CountriesHook` (Countries API). |
+| `warrior` | Warrior (melee): data-driven `Stance`/`StanceRegistry` (`stances/*.yml`), `StanceService` (+`StancePolicy`, exposed as a Bukkit service), `StanceApplier`, `WarriorCombat` (glance/parry/stun in one listener), `StunService`, `FervorService`, `WarCryService`, `StanceEffects`, `StanceMenu`; `WarriorManager` wires and ticks it. |
 | `command` | `SkillsCommand` — the single `/skills` entry point. |
 
 Persistence goes through `DataStore`; only `YamlDataStore` exists today. To add SQLite/MySQL,
@@ -61,6 +62,7 @@ can read to add a visual cue a non-hearing player compensates through their clas
 - Blacksmith class & crafting gates → `docs/blacksmith.md`
 - Hunter class (bows/crossbows, ranged abilities, glow API) → `docs/hunter.md`
 - Thief class (lockpicking, backstab, pickpocket, smoke; Countries/items soft-deps) → `docs/thief.md`
+- Warrior class (stances, glance/parry/stun, Fervor, war cries, stance API) → `docs/warrior.md`
 - Weapon/tool/armor modifiers (data-driven) → `docs/modifiers.md`
 
 ## Deliberately not done yet (next milestones)

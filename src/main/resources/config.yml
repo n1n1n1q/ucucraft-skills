@@ -46,6 +46,11 @@ classes:
     # Accessibility bonus (0 disables). The level-2 slow arrow plays a sound cue; a non-hearing
     # hunter can compensate through this. Hunter crafting/reforging has no minigame.
     visual-cue-level: 1
+  warrior:
+    # The warrior has no flat passive at all: everything it gets comes from its stance.
+    # Accessibility bonus (0 disables). War cries are loud, so keep this above 0 — every warrior
+    # roll is announced visually as well (see CLAUDE.md).
+    visual-cue-level: 1
 
 # Blacksmith crafting / Terraria-style modifier system.
 smithing:
@@ -187,6 +192,87 @@ thief:
     self-speed-seconds: 5
     self-speed-amplifier: 1   # amplifier 1 = Speed II
     invisibility-seconds: 5
+
+# Warrior: stances. Every stance's own numbers live in its file under stances/<id>.yml — this block
+# only holds what is shared between them.
+warrior:
+  enabled: true
+  stance:
+    switch-cooldown-seconds: 3
+    # Telegraph before a switch takes effect. No bonuses at all during it, so you cannot flip into
+    # `guard` mid-swing for free. 0 disables the telegraph entirely.
+    warmup-ticks: 20
+    cancel-warmup-on-damage: true
+    reset-on-death: true
+    # The switch cooldown is halved from this level and ignored from the next one.
+    cooldown-halved-level: 3
+    cooldown-free-level: 4
+  combat:
+    # Hard ceiling on glance/parry/stun, so a config typo cannot produce a 100% parry.
+    max-roll-chance: 0.35
+    # A glance is a reduced hit, never a whiff — a miss on a landed swing reads as input loss.
+    glance-multiplier: 0.5
+    # Default reach of cleave/sunder splash when the stance does not set its own.
+    splash-radius: 3.5
+    parry:
+      cooldown-seconds: 4
+      fervor-gain: 15
+      blocks-projectiles: false
+      riposte-window-ticks: 40
+      knockback: 0.6
+    stun:
+      # Players cannot truly be frozen server-side: they get Slowness 7 + Jump Boost 129 + Mining
+      # Fatigue and their outgoing melee is cancelled. Keep the duration short — see docs/warrior.md.
+      duration-ticks: 25
+      cooldown-seconds: 8      # per attacking warrior
+      immunity-seconds: 6      # per target, after a stun ends
+      dr-window-seconds: 20
+      dr-steps: [1.0, 0.5, 0.25, 0.0]
+      min-fervor: 0            # 0 = no Fervor gate on stuns
+      pvp-enabled: false       # stuns are a PvE tool until you have tuned them
+  fervor:
+    enabled: true
+    max: 100
+    per-hit: 8
+    glance-loss: 10
+    decay-per-second: 4
+    charge-threshold: 60
+  particles:
+    enabled: true
+    # Also the warrior tick: Fervor decay and the stance re-check run on it.
+    interval-ticks: 10
+    view-distance: 32
+    scale-with-fervor: true
+  # Action bar: the stance name is the third cue channel next to colour and shape.
+  hud:
+    enabled: true
+    bar-width: 10
+    filled: "|"
+    empty: "."
+  warcry:
+    min-level: 4
+    trigger: drop            # drop | left-click-air | double-swap
+    min-fervor: 30           # Fervor needed to shout at all
+    spend-down-to: 0         # everything above this is spent; the effect scales with the amount
+    min-scale: 0.5           # weakest a cry can come out at
+    cooldown-seconds: 45
+    radius: 8                # used when the stance's warcry block sets no radius
+    knockback: 0.8
+  sounds:
+    volume: 0.8
+    switch: "minecraft:item.armor.equip_iron"
+    warmup: "minecraft:block.note_block.hat"
+    parry: "minecraft:item.shield.block"
+    glance: "minecraft:entity.player.attack.weak"
+    stun: "minecraft:block.anvil.land"
+    warcry: "minecraft:entity.ravager.roar"
+  # Levels unlock options, not numbers: magnitude scales the gain AND the cost of every stance.
+  # `stances` decides which stance ids unlock at each level (overriding the file's own min-level).
+  levels:
+    1: { magnitude: 1.0, stances: [neutral, onslaught, guard] }
+    2: { magnitude: 1.1, stances: [skirmish, phalanx] }
+    3: { magnitude: 1.2, stances: [cleave, sunder, riposte] }
+    4: { magnitude: 1.3, stances: [] }
 
 crafting:
   # Detect ucucraft-items rose gold via its item-id PDC (soft dependency; no hard link).

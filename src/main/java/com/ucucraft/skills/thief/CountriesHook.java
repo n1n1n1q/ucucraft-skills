@@ -3,6 +3,7 @@ package com.ucucraft.skills.thief;
 import com.ucucraft.countries.api.CountriesAPI;
 import com.ucucraft.countries.api.CountriesProvider;
 import com.ucucraft.countries.api.CountryView;
+import com.ucucraft.countries.api.Relation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,6 +20,22 @@ public final class CountriesHook {
     public boolean available() {
         try {
             return Bukkit.getPluginManager().getPlugin("Countries") != null && CountriesProvider.get() != null;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /**
+     * True when the two players are in the same country or in allied ones — the warrior's area
+     * damage must not touch them. False whenever Countries is absent, so nothing is blocked.
+     */
+    public boolean friendly(Player a, Player b) {
+        try {
+            if (!available()) {
+                return false;
+            }
+            Relation relation = CountriesProvider.get().getRelation(a.getUniqueId(), b.getUniqueId());
+            return relation == Relation.SELF || relation == Relation.ALLY;
         } catch (Throwable t) {
             return false;
         }

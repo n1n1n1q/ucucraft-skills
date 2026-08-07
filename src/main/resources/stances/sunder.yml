@@ -1,0 +1,42 @@
+# Злам — the mace stance. The heaviest stun in the game and a shockwave on every hit; you give up
+# nearly all of your mobility for it. Needs a MACE (1.21+); the stance is dropped if it is missing.
+id: sunder
+name: "<color:#6A3FA0>Злам</color>"
+icon: MACE
+applies-to: [MACE]
+min-level: 3
+
+attributes:
+  movement_speed: -0.015
+  attack_speed: -0.3
+  knockback_resistance: 0.2
+
+charged:
+  attack_damage: 1.5
+
+combat:
+  stun-chance: 0.30
+
+effects:
+  # Every landed hit smashes the ground around the target.
+  smash-radius: 3.0
+  smash-percent: 0.4
+  smash-max-targets: 4
+  slowness-ticks: 60
+  slowness-amplifier: 1
+
+particles:
+  particle: DUST
+  color: "#6A3FA0"
+  shape: PULSE
+  count: 8
+  size: 1.3
+
+# Землетрус: every grounded target in radius is stunned (still DR-gated).
+warcry:
+  id: quake
+  duration-seconds: 2
+  radius: 6
+  hostile-effects:
+    slowness: 2
+  traits: [SHOCKWAVE]

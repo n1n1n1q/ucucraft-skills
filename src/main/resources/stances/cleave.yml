@@ -1,0 +1,42 @@
+# Розкол — the axe stance. Every hit splashes and strips armour, at the cost of speed, accuracy
+# and twice the durability.
+id: cleave
+name: "<color:#E07A1F>Розкол</color>"
+icon: IRON_AXE
+applies-to: [AXE]
+min-level: 3
+
+attributes:
+  attack_speed: -0.4
+
+charged:
+  attack_damage: 1.0
+
+combat:
+  glance-chance: 0.15
+
+effects:
+  cleave-percent: 0.5
+  cleave-radius: 3.5
+  cleave-max-targets: 3
+  # Armour shred, stacking on everything the cleave touches.
+  shred-amount: 1.0
+  shred-max-stacks: 4
+  shred-seconds: 6
+  # Durability cost multiplier for a cleaving swing.
+  durability-multiplier: 2
+  cry-max-targets: 8
+
+particles:
+  particle: DUST
+  color: "#E07A1F"
+  shape: WIDE_RING
+  count: 10
+  size: 1.2
+
+# Вихор: an instant 360° sweep at double cleave power, shredding everything in reach.
+warcry:
+  id: whirlwind
+  duration-seconds: 3
+  radius: 5
+  traits: [SWEEP]

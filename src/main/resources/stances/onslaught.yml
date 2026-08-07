@@ -1,0 +1,37 @@
+# Наступ — all forward. More damage and swing speed, paid for with armour, footing and clean hits.
+id: onslaught
+name: "<color:#C1121F>Наступ</color>"
+icon: IRON_SWORD
+applies-to: [MELEE]
+min-level: 1
+
+attributes:
+  attack_damage: 2.0
+  attack_speed: 0.4
+  armor: -2.0
+  knockback_resistance: -0.1
+
+# Added on top while Fervor is above warrior.fervor.charge-threshold.
+charged:
+  attack_damage: 1.0
+
+combat:
+  glance-chance: 0.15
+  stun-chance: 0.05
+
+particles:
+  particle: DUST
+  color: "#C1121F"
+  shape: RING_LOW
+  count: 6
+  size: 1.0
+
+# Рев: hostiles flee and are weakened, you get Strength.
+warcry:
+  id: roar
+  duration-seconds: 6
+  self-effects:
+    strength: 1
+  hostile-effects:
+    weakness: 0
+  traits: [FLEE]

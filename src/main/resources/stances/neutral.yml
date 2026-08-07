@@ -1,0 +1,13 @@
+# Вільна — the fallback stance. No gain, no cost, always available and never suspended.
+# `name` is the default display name; lang/<locale>.yml -> warrior.stance-names.neutral overrides it.
+id: neutral
+name: "<gray>Вільна</gray>"
+icon: GRAY_DYE
+applies-to: [ANY]
+min-level: 1
+
+combat:
+  parry-chance: 0.05
+
+particles:
+  shape: NONE

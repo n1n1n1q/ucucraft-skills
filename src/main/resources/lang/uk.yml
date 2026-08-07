@@ -16,6 +16,7 @@ help:
     - "<yellow>/skills scroll [class]</yellow> <gray>- отримати сувій класу (адмін)"
     - "<yellow>/skills set <class> [player]</yellow> <gray>- призначити клас (адмін)"
     - "<yellow>/skills addxp <amount> [player]</yellow> <gray>- видати досвід (адмін)"
+    - "<yellow>/skills particles [on|off]</yellow> <gray>- перемкнути частинки стійок воїна"
     - "<yellow>/skills reload</yellow> <gray>- перезавантажити конфіг і мову (адмін)"
 
 # Відображувані назви класів (для гравців, MiniMessage).
@@ -24,6 +25,7 @@ class-names:
   blacksmith: "<gradient:#d98032:#f5c542>Ремісник</gradient>"
   hunter: "<gradient:#3a7d34:#8fd14f>Мисливець</gradient>"
   thief: "<gradient:#5a4b81:#9b8cc4>Злодій</gradient>"
+  warrior: "<gradient:#c1121f:#f08a5d>Воїн</gradient>"
 
 class:
   none: "<gray>У вас немає класу. Використайте Сувій, щоб обрати."
@@ -84,6 +86,53 @@ thief:
   pickpocket-victim: "<red>Вам полегшало — щось зникло."
   smoke-deployed: "<dark_gray>Ви зникаєте в хмарі диму."
   smoke-cooldown: "<red>Димова бомба ще не готова — зачекайте <yellow><seconds></yellow>с."
+
+# Стійки, бойові кидки та бойові кличі воїна.
+warrior:
+  # Назви стійок. Перекривають `name` у stances/<id>.yml; id мають збігатися.
+  stance-names:
+    neutral: "<gray>Вільна</gray>"
+    onslaught: "<color:#C1121F>Наступ</color>"
+    guard: "<color:#4A6FA5>Оборона</color>"
+    skirmish: "<color:#3FA34D>Натиск</color>"
+    phalanx: "<color:#C89B3C>Стіна</color>"
+    cleave: "<color:#E07A1F>Розкол</color>"
+    sunder: "<color:#6A3FA0>Злам</color>"
+    riposte: "<color:#DCDCDC>Відповідь</color>"
+  warcry-names:
+    roar: "Рев"
+    hold: "Стійте!"
+    dash: "Ривок"
+    spear: "Спис вперед"
+    whirlwind: "Вихор"
+    quake: "Землетрус"
+    challenge: "Виклик"
+  stance-changed: "<green>Стійка: <yellow><stance></yellow>."
+  stance-warmup: "<gray>Переходите в <yellow><stance></yellow>..."
+  stance-interrupted: "<red>Удар збиває вас — перехід скасовано."
+  stance-cooldown: "<red>Ще ні — зачекайте <yellow><seconds></yellow>с до наступної зміни."
+  stance-locked: "<red><stance> <red>потребує воїна <yellow><level></yellow> рівня."
+  stance-blocked: "<red><stance> <red>тут заборонена."
+  stance-wrong-weapon: "<red>Не та зброя для <stance><red>."
+  stance-none: "<gray>З цією зброєю більше нема на що перемикатись."
+  # Підказки на панелі дій — візуальна половина кожного кидка; друга половина це звук.
+  hud: "<gray>[<yellow><stance><gray>] <dark_gray><bar>"
+  hud-suspended: "<dark_gray>[<gray><stance><dark_gray>] <dark_gray><bar>"
+  parry: "<white>Парирування!"
+  glance: "<gray>Ковзний удар."
+  riposte: "<white>Відповідь!"
+  stun: "<gold>Оглушено!"
+  warcry-used: "<gold><cry>!"
+  warcry-none: "<gray>Цій стійці нема чого кричати."
+  warcry-cooldown: "<red>Голос сів — зачекайте <yellow><seconds></yellow>с."
+  warcry-fervor: "<red>Замало Запалу — потрібно <yellow><fervor></yellow>."
+  menu-title: "Стійки"
+  menu-active: "<green>Активна"
+  menu-available: "<gray>Клікніть, щоб перемкнути"
+  menu-locked: "<red>Відкривається на рівні <level>"
+  menu-wrong-weapon: "<red>Не та зброя в руці"
+  particles-on: "<green>Частинки воїна увімкнено."
+  particles-off: "<gray>Частинки воїна вимкнено. Звукові підказки лишаються."
 
 minigame:
   unknown: "<red>Немає міні-гри з id <yellow><id></yellow>. Доступні: <list>."

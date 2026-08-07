@@ -6,6 +6,7 @@ import com.ucucraft.skills.classes.impl.BlacksmithClass;
 import com.ucucraft.skills.classes.impl.ExampleClass;
 import com.ucucraft.skills.classes.impl.HunterClass;
 import com.ucucraft.skills.classes.impl.ThiefClass;
+import com.ucucraft.skills.classes.impl.WarriorClass;
 import com.ucucraft.skills.command.SkillsCommand;
 import com.ucucraft.skills.config.ConfigManager;
 import com.ucucraft.skills.data.DataStore;
@@ -34,6 +35,7 @@ import com.ucucraft.skills.thief.ThiefCombat;
 import com.ucucraft.skills.thief.ThiefManager;
 import com.ucucraft.skills.thief.ThiefPickpocket;
 import com.ucucraft.skills.thief.ThiefSmoke;
+import com.ucucraft.skills.warrior.WarriorManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -47,6 +49,7 @@ public final class SkillsPlugin extends JavaPlugin {
     private MinigameManager minigameManager;
     private ModifierRegistry modifierRegistry;
     private HarderRecipes harderRecipes;
+    private WarriorManager warriorManager;
 
     @Override
     public void onEnable() {
@@ -61,6 +64,8 @@ public final class SkillsPlugin extends JavaPlugin {
         classRegistry.register(new BlacksmithClass(configManager));
         classRegistry.register(new HunterClass(configManager));
         classRegistry.register(new ThiefClass(configManager));
+        WarriorClass warriorClass = new WarriorClass(configManager);
+        classRegistry.register(warriorClass);
 
         classManager = new ClassManager(dataStore, classRegistry, lang, configManager);
 
@@ -101,6 +106,11 @@ public final class SkillsPlugin extends JavaPlugin {
         ThiefPickpocket thiefPickpocket = new ThiefPickpocket(configManager, classManager, lang, minigameManager);
         ThiefSmoke thiefSmoke = new ThiefSmoke(configManager, classManager, lang);
 
+        // The warrior module registers its own listeners and the StanceService Bukkit service.
+        warriorManager = new WarriorManager(this, lang, configManager, classManager, countriesHook);
+        warriorManager.register();
+        warriorClass.bind(warriorManager.stances());
+
         getServer().getPluginManager().registerEvents(classManager, this);
         getServer().getPluginManager().registerEvents(minigameManager, this);
         getServer().getPluginManager().registerEvents(smithingManager, this);
@@ -115,8 +125,8 @@ public final class SkillsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new ScrollListener(scrollItem, classManager, classRegistry, lang), this);
 
-        Objects.requireNonNull(getCommand("skills")).setExecutor(
-                new SkillsCommand(this, lang, classManager, classRegistry, scrollItem, minigameManager));
+        Objects.requireNonNull(getCommand("skills")).setExecutor(new SkillsCommand(
+                this, lang, classManager, classRegistry, scrollItem, minigameManager, warriorManager));
     }
 
     @Override
@@ -127,13 +137,17 @@ public final class SkillsPlugin extends JavaPlugin {
         if (harderRecipes != null) {
             harderRecipes.unregister();
         }
+        if (warriorManager != null) {
+            warriorManager.shutdown();
+        }
     }
 
-    /** Reload config, language, modifiers and crafting recipes at runtime. */
+    /** Reload config, language, modifiers, crafting recipes and stances at runtime. */
     public void reloadAll() {
         configManager.reload();
         lang.reload();
         modifierRegistry.load();
         harderRecipes.register(configManager.raw().getConfigurationSection("crafting.harder-recipes"));
+        warriorManager.reload();
     }
 }

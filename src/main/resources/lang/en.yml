@@ -17,6 +17,7 @@ help:
     - "<yellow>/skills scroll [class]</yellow> <gray>- get a class scroll (admin)"
     - "<yellow>/skills set <class> [player]</yellow> <gray>- assign a class (admin)"
     - "<yellow>/skills addxp <amount> [player]</yellow> <gray>- grant XP (admin)"
+    - "<yellow>/skills particles [on|off]</yellow> <gray>- toggle warrior stance particles"
     - "<yellow>/skills reload</yellow> <gray>- reload config and language (admin)"
 
 # Display names for classes (user-facing, MiniMessage).
@@ -25,6 +26,7 @@ class-names:
   blacksmith: "<gradient:#d98032:#f5c542>Blacksmith</gradient>"
   hunter: "<gradient:#3a7d34:#8fd14f>Hunter</gradient>"
   thief: "<gradient:#5a4b81:#9b8cc4>Thief</gradient>"
+  warrior: "<gradient:#c1121f:#f08a5d>Warrior</gradient>"
 
 class:
   none: "<gray>You have no class. Use a Scroll to choose one."
@@ -85,6 +87,53 @@ thief:
   pickpocket-victim: "<red>You feel lighter — something is missing."
   smoke-deployed: "<dark_gray>You vanish in a cloud of smoke."
   smoke-cooldown: "<red>Your smoke bomb isn't ready — wait <yellow><seconds></yellow>s."
+
+# Warrior stances, combat rolls and war cries.
+warrior:
+  # Stance display names. Override the `name` in stances/<id>.yml; keep the ids in sync with it.
+  stance-names:
+    neutral: "<gray>Free</gray>"
+    onslaught: "<color:#C1121F>Onslaught</color>"
+    guard: "<color:#4A6FA5>Guard</color>"
+    skirmish: "<color:#3FA34D>Skirmish</color>"
+    phalanx: "<color:#C89B3C>Phalanx</color>"
+    cleave: "<color:#E07A1F>Cleave</color>"
+    sunder: "<color:#6A3FA0>Sunder</color>"
+    riposte: "<color:#DCDCDC>Riposte</color>"
+  warcry-names:
+    roar: "Roar"
+    hold: "Hold the Line"
+    dash: "Dash"
+    spear: "Spears Forward"
+    whirlwind: "Whirlwind"
+    quake: "Earthquake"
+    challenge: "Challenge"
+  stance-changed: "<green>Stance: <yellow><stance></yellow>."
+  stance-warmup: "<gray>Settling into <yellow><stance></yellow>..."
+  stance-interrupted: "<red>The blow breaks your footing — the switch is cancelled."
+  stance-cooldown: "<red>Not yet — wait <yellow><seconds></yellow>s before switching again."
+  stance-locked: "<red><stance> <red>needs a level <yellow><level></yellow> warrior."
+  stance-blocked: "<red><stance> <red>is not allowed here."
+  stance-wrong-weapon: "<red>The wrong weapon for <stance><red>."
+  stance-none: "<gray>Nothing else to switch to with this weapon."
+  # Action bar cues. These are the visual half of every roll — the sound is the other half.
+  hud: "<gray>[<yellow><stance><gray>] <dark_gray><bar>"
+  hud-suspended: "<dark_gray>[<gray><stance><dark_gray>] <dark_gray><bar>"
+  parry: "<white>Parried!"
+  glance: "<gray>Glancing blow."
+  riposte: "<white>Riposte!"
+  stun: "<gold>Stunned!"
+  warcry-used: "<gold><cry>!"
+  warcry-none: "<gray>This stance has nothing to shout about."
+  warcry-cooldown: "<red>Your voice is spent — wait <yellow><seconds></yellow>s."
+  warcry-fervor: "<red>Not enough Fervor — you need <yellow><fervor></yellow>."
+  menu-title: "Stances"
+  menu-active: "<green>Active"
+  menu-available: "<gray>Click to switch"
+  menu-locked: "<red>Unlocks at level <level>"
+  menu-wrong-weapon: "<red>Wrong weapon in hand"
+  particles-on: "<green>Warrior particles enabled."
+  particles-off: "<gray>Warrior particles disabled. Sound cues stay on."
 
 minigame:
   unknown: "<red>No minigame with id <yellow><id></yellow>. Available: <list>."

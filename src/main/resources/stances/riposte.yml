@@ -1,0 +1,40 @@
+# Відповідь — the duellist. A parry is no longer just a save: it refunds Fervor and opens a crit
+# window. Paid for with armour, because the whole stance assumes you parry instead of tanking.
+id: riposte
+name: "<color:#DCDCDC>Відповідь</color>"
+icon: NETHERITE_SWORD
+applies-to: [SWORD]
+min-level: 3
+
+attributes:
+  armor: -3.0
+
+charged:
+  attack_damage: 1.0
+
+combat:
+  parry-chance: 0.20
+  stun-chance: 0.05
+
+effects:
+  # Longer window than the warrior.combat.parry.riposte-window-ticks default, and it crits.
+  riposte-window-ticks: 60
+  riposte-crit-multiplier: 1.75
+  parry-fervor-refund: 10
+  # Виклик: the marked duel target takes more and parries land twice as often against it.
+  duel-damage-bonus: 3.0
+  duel-parry-multiplier: 2.0
+
+particles:
+  particle: DUST
+  color: "#DCDCDC"
+  shape: HELIX
+  count: 6
+  size: 0.9
+
+# Виклик: mark the nearest hostile as your duel.
+warcry:
+  id: challenge
+  duration-seconds: 10
+  radius: 8
+  traits: [DUEL]

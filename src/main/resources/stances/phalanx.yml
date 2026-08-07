@@ -1,0 +1,44 @@
+# Стіна — the spear wall. Longer reach and brutal against anything closing on you, but slow.
+# Needs the entity_interaction_range attribute (1.20.5+); the stance is dropped if it is missing.
+id: phalanx
+name: "<color:#C89B3C>Стіна</color>"
+icon: TRIDENT
+applies-to: [TRIDENT]
+min-level: 2
+
+attributes:
+  entity_interaction_range: 1.5
+  attack_speed: -0.3
+  movement_speed: -0.01
+
+charged:
+  entity_interaction_range: 0.5
+
+combat:
+  parry-chance: 0.15
+  stun-chance: 0.10
+
+effects:
+  # Bonus damage against targets moving toward you; threshold is the dot product of their approach.
+  charge-bonus: 3.0
+  charge-threshold: 0.2
+  # The stun only lands on those charge hits.
+  stun-requires-charge: true
+  cry-cone-degrees: 90
+
+particles:
+  particle: DUST
+  color: "#C89B3C"
+  shape: ARC
+  count: 7
+  size: 1.0
+
+# Спис вперед: a frontal cone is knocked back and rooted; allies behind you harden.
+warcry:
+  id: spear
+  duration-seconds: 5
+  hostile-effects:
+    slowness: 5
+  ally-effects:
+    resistance: 0
+  traits: [CONE, KNOCKBACK]

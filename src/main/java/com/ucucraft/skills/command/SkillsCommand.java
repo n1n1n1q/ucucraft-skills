@@ -8,6 +8,7 @@ import com.ucucraft.skills.data.PlayerProfile;
 import com.ucucraft.skills.item.ScrollItem;
 import com.ucucraft.skills.lang.LangManager;
 import com.ucucraft.skills.minigame.MinigameManager;
+import com.ucucraft.skills.warrior.WarriorManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 public final class SkillsCommand implements TabExecutor {
 
     private static final List<String> ROOT = List.of(
-            "help", "class", "minigame", "scroll", "set", "addxp", "reload");
+            "help", "class", "minigame", "scroll", "set", "addxp", "particles", "reload");
 
     private final SkillsPlugin plugin;
     private final LangManager lang;
@@ -31,15 +32,18 @@ public final class SkillsCommand implements TabExecutor {
     private final SkillClassRegistry registry;
     private final ScrollItem scroll;
     private final MinigameManager minigames;
+    private final WarriorManager warriors;
 
     public SkillsCommand(SkillsPlugin plugin, LangManager lang, ClassManager classManager,
-                         SkillClassRegistry registry, ScrollItem scroll, MinigameManager minigames) {
+                         SkillClassRegistry registry, ScrollItem scroll, MinigameManager minigames,
+                         WarriorManager warriors) {
         this.plugin = plugin;
         this.lang = lang;
         this.classManager = classManager;
         this.registry = registry;
         this.scroll = scroll;
         this.minigames = minigames;
+        this.warriors = warriors;
     }
 
     @Override
@@ -51,6 +55,7 @@ public final class SkillsCommand implements TabExecutor {
             case "scroll" -> scrollCommand(sender, args);
             case "set" -> setCommand(sender, args);
             case "addxp" -> addXpCommand(sender, args);
+            case "particles" -> particlesCommand(sender, args);
             case "reload" -> reloadCommand(sender);
             case "help" -> help(sender);
             default -> lang.send(sender, "general.unknown-command");
@@ -171,6 +176,20 @@ public final class SkillsCommand implements TabExecutor {
         classManager.addXp(target, amount);
     }
 
+    /** Opts this client out of warrior particles; the sound cues stay as the accessibility fallback. */
+    private void particlesCommand(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            lang.send(sender, "general.players-only");
+            return;
+        }
+        boolean wanted = args.length >= 2 ? args[1].equalsIgnoreCase("on")
+                : !warriors.effects().shown(player);
+        if (wanted != warriors.effects().shown(player)) {
+            warriors.effects().toggle(player);
+        }
+        lang.send(player, wanted ? "warrior.particles-on" : "warrior.particles-off");
+    }
+
     private void reloadCommand(CommandSender sender) {
         if (!sender.hasPermission("skills.admin")) {
             lang.send(sender, "general.no-permission");
@@ -197,6 +216,9 @@ public final class SkillsCommand implements TabExecutor {
                 }
                 case "minigame" -> {
                     return filter(new ArrayList<>(minigames.ids()), args[1]);
+                }
+                case "particles" -> {
+                    return filter(List.of("on", "off"), args[1]);
                 }
                 case "scroll", "set" -> {
                     return filter(registry.all().stream().map(SkillClass::id).collect(Collectors.toList()), args[1]);
