@@ -41,7 +41,8 @@ methods; none reaches into another's internals.
 | `smithing` | Blacksmith crafting: `GearTier`/`GearType`, data-driven `Modifier`/`ModifierRegistry`/`ModifierService`/`ModifierRoller`, `HarderRecipes`, `RoseGold` (soft dep), `SmithingManager`. |
 | `hunter` | Hunter (ranged): reuses the smithing modifier system for bows/crossbows via `HunterManager`; combat abilities in `HunterCombat`/`HunterCrossbow`; `GlowService`/`GlowPolicy` expose the highlight ability as a Bukkit service. |
 | `thief` | Thief (stealth): `ThiefManager` (lockpicking), `ThiefCombat` (fall/backstab), `ThiefPickpocket`, `ThiefSmoke`; soft-dep hooks `Lockpick` (ucucraft-items) and `CountriesHook` (Countries API). |
-| `warrior` | Warrior (melee): data-driven `Stance`/`StanceRegistry` (`stances/*.yml`), `StanceService` (+`StancePolicy`, exposed as a Bukkit service), `StanceApplier`, `WarriorCombat` (glance/parry/stun in one listener), `StunService`, `FervorService`, `WarCryService`, `StanceEffects`, `StanceMenu`; `WarriorManager` wires and ticks it. |
+| `warrior` | Warrior (melee): data-driven `Stance`/`StanceRegistry` (`stances/*.yml`), `StanceService` (+`StancePolicy`, exposed as a Bukkit service), `StanceApplier`, `WarriorCombat` (glance/parry/stun in one listener), `StunService`, `FervorService`, `WarCryService`, `DuelService` (the riposte cry's formal duel), `StanceEffects`, `StanceMenu`; `WarriorManager` wires and ticks it. |
+| `runes` | Runesmith (enchanting): data-driven `Rune`/`RuneRegistry` (`runes/*.yml`, one per vanilla trim pattern), `RuneRoller`, `RuneService` (PDC + trim/enchant/lore), `RunesmithManager` (carve/upgrade/duplicate/transfer/strip/read), `ResonanceService` (level-4 passive), `EnchantmentGate` (the six-path vanilla enchant cap, applies to every player). |
 | `command` | `SkillsCommand` — the single `/skills` entry point. |
 
 Persistence goes through `DataStore`; only `YamlDataStore` exists today. To add SQLite/MySQL,
@@ -63,6 +64,7 @@ can read to add a visual cue a non-hearing player compensates through their clas
 - Hunter class (bows/crossbows, ranged abilities, glow API) → `docs/hunter.md`
 - Thief class (lockpicking, backstab, pickpocket, smoke; Countries/items soft-deps) → `docs/thief.md`
 - Warrior class (stances, glance/parry/stun, Fervor, war cries, stance API) → `docs/warrior.md`
+- Runesmith class (enchant carving via armor trims, the six-path enchant cap) → `docs/runesmith.md`
 - Weapon/tool/armor modifiers (data-driven) → `docs/modifiers.md`
 
 ## Deliberately not done yet (next milestones)

@@ -5,23 +5,24 @@ import com.ucucraft.skills.classes.ClassManager;
 import com.ucucraft.skills.config.ConfigManager;
 import com.ucucraft.skills.lang.LangManager;
 import com.ucucraft.skills.thief.CountriesHook;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -31,8 +32,8 @@ import java.util.UUID;
  * refresh (so a stance suspends and snaps back on its own) and the ambient aura all run from there
  * at {@code warrior.particles.interval-ticks}.
  *
- * <p>Also the input layer: sneak + swap-hand cycles stances, sneak + right-click air opens the
- * picker, and taking damage cancels a pending switch.
+ * <p>Also the input layer: sneak + swap-hand shouts a war cry when one is ready and otherwise
+ * cycles stances, and taking damage cancels a pending switch.
  */
 public final class WarriorManager implements Listener {
 
@@ -46,10 +47,11 @@ public final class WarriorManager implements Listener {
     private final StanceService stances;
     private final StunService stuns;
     private final WarriorTargets targets;
+    private final DuelService duels;
     private final WarriorCombat combat;
     private final WarCryService warcries;
-    private final StanceMenu menu;
     private final Set<UUID> tracked = new HashSet<>();
+    private final Map<UUID, BossBar> bars = new HashMap<>();
     private BukkitTask task;
     private int tick;
 
@@ -65,10 +67,10 @@ public final class WarriorManager implements Listener {
         this.stances = new StanceService(plugin, config, lang, classes, registry, applier, fervor, effects);
         this.stuns = new StunService(plugin, config, effects);
         this.targets = new WarriorTargets(plugin, config, countries, applier);
-        this.combat = new WarriorCombat(config, lang, stances, fervor, stuns, effects, targets);
+        this.duels = new DuelService(plugin, config, lang, effects);
+        this.combat = new WarriorCombat(config, lang, stances, fervor, stuns, effects, targets, duels);
         this.warcries = new WarCryService(plugin, config, lang, stances, fervor, stuns, effects,
-                targets, applier, combat);
-        this.menu = new StanceMenu(lang, stances);
+                targets, applier, combat, duels);
     }
 
     /** Loads the stances, registers every listener and exposes {@link StanceService} as a service. */
@@ -76,8 +78,7 @@ public final class WarriorManager implements Listener {
         registry.load();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         plugin.getServer().getPluginManager().registerEvents(combat, plugin);
-        plugin.getServer().getPluginManager().registerEvents(warcries, plugin);
-        plugin.getServer().getPluginManager().registerEvents(menu, plugin);
+        plugin.getServer().getPluginManager().registerEvents(duels, plugin);
         plugin.getServer().getServicesManager().register(StanceService.class, stances, plugin,
                 ServicePriority.Normal);
         startTask();
@@ -95,6 +96,7 @@ public final class WarriorManager implements Listener {
     public void reload() {
         // Strip against the OLD definitions first — an attribute dropped from a stance file would
         // otherwise no longer be known, and its modifier would stay on the player forever.
+        duels.endAll();
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             stances.clear(player);
         }
@@ -111,7 +113,9 @@ public final class WarriorManager implements Listener {
             task.cancel();
             task = null;
         }
+        duels.endAll();
         for (Player player : plugin.getServer().getOnlinePlayers()) {
+            hideBar(player);
             stances.clear(player);
         }
     }
@@ -134,6 +138,7 @@ public final class WarriorManager implements Listener {
                 // Someone who just changed class keeps their modifiers otherwise, and they persist.
                 if (tracked.remove(player.getUniqueId())) {
                     stances.clear(player);
+                    hideBar(player);
                 }
                 continue;
             }
@@ -146,28 +151,87 @@ public final class WarriorManager implements Listener {
         }
     }
 
-    /** Third cue channel: the stance name (and Fervor) on the action bar. */
+    /**
+     * Third cue channel: a boss bar carrying the stance name and Fervor (the bar's fill IS the Fervor
+     * fraction), shown while a melee weapon is in hand. Hidden otherwise, so the bar rides the weapon.
+     */
     private void hud(Player player, Stance active) {
-        if (!config.raw().getBoolean("warrior.hud.enabled", true) || stances.warmingUp(player)) {
+        if (!config.raw().getBoolean("warrior.hud.enabled", true) || stances.warmingUp(player)
+                || duels.inDuel(player)
+                || WeaponFamily.of(player.getInventory().getItemInMainHand().getType()) == null) {
+            // A duel replaces the Fervor bar with its own countdown bar, owned by DuelService.
+            hideBar(player);
             return;
         }
-        Map<String, String> placeholders = Map.of(
-                "stance", stances.displayName(stances.selected(player)),
-                "bar", bar(fervor.ratio(player)),
-                "fervor", String.valueOf(Math.round(fervor.value(player))));
-        player.sendActionBar(lang.component(
-                stances.suspended(player) ? "warrior.hud-suspended" : "warrior.hud", placeholders));
+        Component title;
+        float progress;
+        BossBar.Color color;
+        long cooldown = warcries.cooldownRemaining(player);
+        if (cooldown > 0) {
+            // A war cry just fired: until it recharges, the bar counts the cooldown down instead of
+            // Fervor — that, not Fervor, is why shift+F cycles stances rather than shouting again.
+            title = lang.component("warrior.hud-cooldown", Map.of(
+                    "stance", stances.displayName(stances.selected(player)),
+                    "seconds", String.valueOf(cooldown / 1000 + 1)));
+            progress = (float) cooldown / Math.max(1, warcries.cooldownTotalMs());
+            color = barColor("boss-bar-cooldown-color", BossBar.Color.BLUE);
+        } else {
+            Map<String, String> placeholders = Map.of(
+                    "stance", stances.displayName(stances.selected(player)),
+                    "fervor", String.valueOf(Math.round(fervor.value(player))));
+            title = lang.component(
+                    stances.suspended(player) ? "warrior.hud-suspended" : "warrior.hud", placeholders);
+            progress = (float) fervor.ratio(player);
+            color = fervor.charged(player)
+                    ? barColor("boss-bar-charged-color", BossBar.Color.RED)
+                    : barColor("boss-bar-color", BossBar.Color.YELLOW);
+        }
+        if (config.raw().getBoolean("warrior.hud.boss-bar", true)) {
+            showBar(player, title, progress, color);
+        } else {
+            hideBar(player);
+            player.sendActionBar(title);
+        }
     }
 
-    private String bar(double ratio) {
-        int width = Math.max(0, config.raw().getInt("warrior.hud.bar-width", 10));
-        int filled = (int) Math.round(ratio * width);
-        return glyph("filled", "|").repeat(filled) + glyph("empty", ".").repeat(width - filled);
+    /** Creates the player's boss bar on first show, then only updates it in place afterwards. */
+    private void showBar(Player player, Component title, float progress, BossBar.Color color) {
+        float clamped = Math.max(0f, Math.min(1f, progress));
+        BossBar bar = bars.get(player.getUniqueId());
+        if (bar == null) {
+            bar = BossBar.bossBar(title, clamped, color, barOverlay());
+            bars.put(player.getUniqueId(), bar);
+            player.showBossBar(bar);
+        } else {
+            bar.name(title);
+            bar.progress(clamped);
+            bar.color(color);
+        }
     }
 
-    private String glyph(String key, String fallback) {
-        String value = config.raw().getString("warrior.hud." + key, fallback);
-        return value == null || value.isEmpty() ? fallback : value.substring(0, 1);
+    private void hideBar(Player player) {
+        BossBar bar = bars.remove(player.getUniqueId());
+        if (bar != null) {
+            player.hideBossBar(bar);
+        }
+    }
+
+    private BossBar.Color barColor(String key, BossBar.Color fallback) {
+        String value = config.raw().getString("warrior.hud." + key, fallback.name());
+        try {
+            return BossBar.Color.valueOf(value.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return fallback;
+        }
+    }
+
+    private BossBar.Overlay barOverlay() {
+        String value = config.raw().getString("warrior.hud.boss-bar-overlay", "PROGRESS");
+        try {
+            return BossBar.Overlay.valueOf(value.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return BossBar.Overlay.PROGRESS;
+        }
     }
 
     @EventHandler
@@ -200,6 +264,7 @@ public final class WarriorManager implements Listener {
     private void cleanup(Player player) {
         UUID uuid = player.getUniqueId();
         tracked.remove(uuid);
+        hideBar(player);
         stances.clear(player);
         fervor.reset(player);
         stuns.clear(uuid);
@@ -214,21 +279,12 @@ public final class WarriorManager implements Listener {
             return;
         }
         event.setCancelled(true);
-        stances.cycle(player);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        // Only with a melee weapon in hand, so sneaking to eat or to draw a bow still works.
-        if (!enabled() || event.getHand() != EquipmentSlot.HAND
-                || event.getAction() != Action.RIGHT_CLICK_AIR
-                || !player.isSneaking() || !stances.isWarrior(player)
-                || WeaponFamily.of(player.getInventory().getItemInMainHand().getType()) == null) {
-            return;
+        // One gesture: shout when a cry is ready to fire, otherwise cycle to the next stance.
+        if (warcries.ready(player)) {
+            warcries.shout(player);
+        } else {
+            stances.cycle(player);
         }
-        event.setCancelled(true);
-        menu.open(player);
     }
 
     @EventHandler

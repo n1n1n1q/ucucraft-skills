@@ -6,6 +6,12 @@ general:
   reloaded: "<green>Конфігурацію та мовні файли перезавантажено."
   unknown-command: "<red>Невідома команда. Використайте <yellow>/skills help</yellow>."
 
+# /damage — адмінський показ підсумкової шкоди кожного вашого удару.
+damage:
+  on: "<green>Показ шкоди увімкнено."
+  off: "<gray>Показ шкоди вимкнено."
+  hit: "<gray>Удар по <white><target></white> — <red><damage></red>"
+
 help:
   header: "<gray>--- <white>Класи</white> ---"
   entries:
@@ -26,6 +32,7 @@ class-names:
   hunter: "<gradient:#3a7d34:#8fd14f>Мисливець</gradient>"
   thief: "<gradient:#5a4b81:#9b8cc4>Злодій</gradient>"
   warrior: "<gradient:#c1121f:#f08a5d>Воїн</gradient>"
+  runesmith: "<gradient:#8e6bd6:#43c6e0>Рунар</gradient>"
 
 class:
   none: "<gray>У вас немає класу. Використайте Сувій, щоб обрати."
@@ -67,6 +74,9 @@ hunter:
   reroll-need-materials: "<red>Потрібно <yellow><cost></yellow>, щоб перекувати це за столом лучника."
   reroll-limit: "<red>Цей лук перековано максимальну кількість разів (<yellow><max></yellow>)."
   reroll-done: "<green>Перековано в якість <name> <green>! <gray>(залишилось <yellow><left></yellow>)"
+  steady-charging: "<gray>Прицілювання… <green><bar>"
+  steady-ready: "<gold>◈ Точний постріл готовий ◈"
+  steady-fired: "<green>Прицільний постріл!"
 
 # Здібності злодія.
 thief:
@@ -80,6 +90,7 @@ thief:
   pickpocket-unavailable: "<red>Зараз не вдається зосередитись на їхніх кишенях."
   pickpocket-menu-title: "Обкрадання <player>"
   pickpocket-failed: "<red>Ваші пальці лишились ні з чим."
+  pickpocket-too-far: "<red>Вони вислизнули з-під рук."
   pickpocket-empty: "<gray>У них нічого взяти."
   pickpocket-success: "<green>Ви поцупили <yellow><amount></yellow>x <white><item></white>."
   pickpocket-caught: "<red><thief> щойно намагався вас обікрасти!"
@@ -115,24 +126,89 @@ warrior:
   stance-blocked: "<red><stance> <red>тут заборонена."
   stance-wrong-weapon: "<red>Не та зброя для <stance><red>."
   stance-none: "<gray>З цією зброєю більше нема на що перемикатись."
-  # Підказки на панелі дій — візуальна половина кожного кидка; друга половина це звук.
-  hud: "<gray>[<yellow><stance><gray>] <dark_gray><bar>"
-  hud-suspended: "<dark_gray>[<gray><stance><dark_gray>] <dark_gray><bar>"
+  # Заголовок бос-бару, поки в руці холодна зброя; заповнення смуги — частка Запалу.
+  # Візуальна половина кожного кидка; друга половина це звук.
+  hud: "<yellow><stance></yellow> <dark_gray>·</dark_gray> <gold>Запал <white><fervor>"
+  hud-suspended: "<gray><stance> <dark_gray>·</dark_gray> <gold>Запал <gray><fervor> <dark_gray>(призупинено)"
+  # Показується на смузі боса, поки бойовий клич відновлюється; заповнення = залишок перезарядки.
+  hud-cooldown: "<aqua><stance></aqua> <dark_gray>·</dark_gray> <aqua>Клич <white><seconds>с"
   parry: "<white>Парирування!"
-  glance: "<gray>Ковзний удар."
+  glance: "<gray>Ковзнув повз!"
   riposte: "<white>Відповідь!"
   stun: "<gold>Оглушено!"
-  warcry-used: "<gold><cry>!"
+  # Двобій бойового кличу «Виклик». <seconds>/<opponent>; <mine>/<theirs> — рахунок завданої шкоди.
+  duel-start: "<gold>Двобій! <yellow><opponent></yellow> <dark_gray>·</dark_gray> <white><seconds>с"
+  duel-bar: "<gold>Двобій <white><seconds>с <dark_gray>·</dark_gray> <red><mine></red> проти <blue><theirs></blue>"
+  duel-win: "<gold>Ви перемогли у двобої з <yellow><opponent></yellow>!"
+  duel-loss: "<gray>Ви програли двобій <yellow><opponent></yellow>."
+  duel-draw: "<gray>Ваш двобій з <yellow><opponent></yellow> завершився внічию."
+  duel-no-target: "<gray>Поруч нема кого викликати."
+  warcry-used: "<gold>Ви видаєте <yellow><cry></yellow>!"
+  warcry-broadcast: "<gold><player> видає <yellow><cry></yellow>!"
   warcry-none: "<gray>Цій стійці нема чого кричати."
+  warcry-locked: "<red>Бойові кличі потребують воїна <yellow><level></yellow> рівня."
   warcry-cooldown: "<red>Голос сів — зачекайте <yellow><seconds></yellow>с."
   warcry-fervor: "<red>Замало Запалу — потрібно <yellow><fervor></yellow>."
-  menu-title: "Стійки"
-  menu-active: "<green>Активна"
-  menu-available: "<gray>Клікніть, щоб перемкнути"
-  menu-locked: "<red>Відкривається на рівні <level>"
-  menu-wrong-weapon: "<red>Не та зброя в руці"
   particles-on: "<green>Частинки воїна увімкнено."
   particles-off: "<gray>Частинки воїна вимкнено. Звукові підказки лишаються."
+
+# Рунар: карбування чарів через оздоблення обладунку.
+runes:
+  # Назви 18 ванільних візерунків оздоблення. Id мають збігатися з runes/<id>.yml.
+  pattern-names:
+    coast: "Узбережжя"
+    dune: "Дюна"
+    eye: "Око"
+    host: "Військо"
+    raiser: "Вихователь"
+    rib: "Ребро"
+    sentry: "Дозорний"
+    shaper: "Форма"
+    silence: "Тиша"
+    snout: "Рило"
+    spire: "Шпиль"
+    tide: "Приплив"
+    vex: "Векс"
+    ward: "Страж"
+    wayfinder: "Дороговказ"
+    wild: "Дикий"
+    bolt: "Блискавка"
+    flow: "Течія"
+  carve-not-runesmith: "<red>Ви не вмієте карбувати руни."
+  carve-disabled: "<red>Руни вимкнено."
+  carve-banned: "<red>Руну <yellow><rune></yellow> <red>назавжди вимкнено на цьому сервері."
+  carve-no-rune: "<red>Цей візерунок не відповідає жодній зареєстрованій руні."
+  carve-need-material: "<red>Потрібен матеріал оздоблення (від міді до незериту) десь у вашому інвентарі."
+  carve-tier-locked: "<red>Цей матеріал потребує рунаря <yellow><level></yellow> рівня."
+  carve-non-armor-locked: "<red>Карбування на зброї та інструментах потребує рунаря <yellow><level></yellow> рівня."
+  carve-min-level: "<red><rune> <red>потребує рунаря <yellow><level></yellow> рівня."
+  carve-one-per-item: "<red>Цей предмет вже несе руну <yellow><rune></yellow>."
+  carve-upgrade-locked: "<red>Покращення руни потребує рунаря <yellow><level></yellow> рівня."
+  carve-upgrade-limit: "<red>Цю руну вже покращено максимальну кількість разів (<yellow><max></yellow>)."
+  carve-upgrade-no-gain: "<red>Цей матеріал не кращий за вже вирізьблений."
+  carve-win: "<green>Руна приймається — <yellow><rune></yellow> <green>рівня <yellow><roman></yellow>."
+  carve-partial: "<yellow>Руна тримається, але слабша, ніж хотілося — <yellow><rune></yellow> <yellow>рівня <yellow><roman></yellow>."
+  carve-fail: "<red>Різьба зривається — замість неї предмет проклято."
+  duplicate-need-level: "<red>Дублювання шаблонів потребує рунаря <yellow><level></yellow> рівня."
+  duplicate-need-materials: "<red>Потрібно <yellow><cost></yellow>, щоб продублювати цей шаблон."
+  duplicate-need-material: "<red>Потрібен матеріал оздоблення (від міді до незериту) десь у вашому інвентарі, щоб продублювати цей шаблон."
+  duplicate-need-single: "<red>Тримайте рівно один шаблон, щоб продублювати його — спершу розділіть стак."
+  duplicate-is-copy: "<red>Цей шаблон вже є копією — його не можна продублювати ще раз."
+  duplicate-exhausted: "<red>Цей шаблон вже продубльовано стільки разів, скільки дозволено."
+  duplicate-done: "<green>Ви дублюєте шаблон. Лишилось <yellow><remaining></yellow> <green>копій для цього шаблону."
+  transfer-need-level: "<red>Перенесення руни потребує рунаря <yellow><level></yellow> рівня."
+  transfer-need-target: "<red>Тримайте предмет-отримувач руни в другій руці."
+  transfer-target-invalid: "<red>Цей предмет не може нести цю руну."
+  transfer-done: "<green>Руна переходить на предмет у другій руці."
+  strip-need-level: "<red>Зняття прокляття потребує рунаря <yellow><level></yellow> рівня."
+  strip-not-cursed: "<gray>На цьому предметі немає руни-прокляття для зняття."
+  strip-done: "<green>Прокляття спадає."
+  read-header: "<gradient:#8e6bd6:#43c6e0>-- Руна --</gradient>"
+  read-line: "<yellow><rune></yellow> <gray>рівень <yellow><roman></yellow> <gray>| модифікатор <yellow><modifier></yellow> <gray>| покращень <yellow><upgrades></yellow>/<max> <gray>| перековок <yellow><rerolls></yellow>"
+  read-cursed: "<dark_red>Проклято — потрібен рунар 3 рівня, щоб зняти."
+  resonance-proc: "<gradient:#8e6bd6:#43c6e0>Резонанс!</gradient>"
+  # Рядок опису на предметі з руною. <name> = назва візерунка, <roman> = рівень чару.
+  rune-lore: "<light_purple><name> <dark_gray><roman>"
 
 minigame:
   unknown: "<red>Немає міні-гри з id <yellow><id></yellow>. Доступні: <list>."

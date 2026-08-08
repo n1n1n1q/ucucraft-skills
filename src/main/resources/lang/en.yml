@@ -7,6 +7,12 @@ general:
   reloaded: "<green>Configuration and language files reloaded."
   unknown-command: "<red>Unknown command. Use <yellow>/skills help</yellow>."
 
+# /damage — admin-only readout of the final damage each of your hits deals.
+damage:
+  on: "<green>Damage readout on."
+  off: "<gray>Damage readout off."
+  hit: "<gray>Hit <white><target></white> for <red><damage></red>"
+
 help:
   header: "<gray>--- <white>Skills</white> ---"
   entries:
@@ -27,6 +33,7 @@ class-names:
   hunter: "<gradient:#3a7d34:#8fd14f>Hunter</gradient>"
   thief: "<gradient:#5a4b81:#9b8cc4>Thief</gradient>"
   warrior: "<gradient:#c1121f:#f08a5d>Warrior</gradient>"
+  runesmith: "<gradient:#8e6bd6:#43c6e0>Runesmith</gradient>"
 
 class:
   none: "<gray>You have no class. Use a Scroll to choose one."
@@ -68,6 +75,9 @@ hunter:
   reroll-need-materials: "<red>You need <yellow><cost></yellow> to reforge this at the archer table."
   reroll-limit: "<red>This bow has been reforged the maximum <yellow><max></yellow> times."
   reroll-done: "<green>Reforged into <name> <green>quality! <gray>(<yellow><left></yellow> left)"
+  steady-charging: "<gray>Steadying aim… <green><bar>"
+  steady-ready: "<gold>◈ Steady Aim ready ◈"
+  steady-fired: "<green>Focused shot!"
 
 # Thief abilities.
 thief:
@@ -81,6 +91,7 @@ thief:
   pickpocket-unavailable: "<red>You can't focus on their pockets right now."
   pickpocket-menu-title: "Pickpocketing <player>"
   pickpocket-failed: "<red>Your fingers come up empty."
+  pickpocket-too-far: "<red>They slipped out of reach."
   pickpocket-empty: "<gray>They have nothing to take."
   pickpocket-success: "<green>You lift <yellow><amount></yellow>x <white><item></white>."
   pickpocket-caught: "<red><thief> just tried to pickpocket you!"
@@ -116,24 +127,90 @@ warrior:
   stance-blocked: "<red><stance> <red>is not allowed here."
   stance-wrong-weapon: "<red>The wrong weapon for <stance><red>."
   stance-none: "<gray>Nothing else to switch to with this weapon."
-  # Action bar cues. These are the visual half of every roll — the sound is the other half.
-  hud: "<gray>[<yellow><stance><gray>] <dark_gray><bar>"
-  hud-suspended: "<dark_gray>[<gray><stance><dark_gray>] <dark_gray><bar>"
+  # Boss-bar HUD title, shown while a melee weapon is held; the bar's fill is the Fervor fraction.
+  # The visual half of every roll — the sound is the other half.
+  hud: "<yellow><stance></yellow> <dark_gray>·</dark_gray> <gold>Fervor <white><fervor>"
+  hud-suspended: "<gray><stance> <dark_gray>·</dark_gray> <gold>Fervor <gray><fervor> <dark_gray>(suspended)"
+  # Shown on the boss bar while a war cry recharges; the bar's fill is the remaining cooldown.
+  hud-cooldown: "<aqua><stance></aqua> <dark_gray>·</dark_gray> <aqua>War cry <white><seconds>s"
   parry: "<white>Parried!"
-  glance: "<gray>Glancing blow."
+  glance: "<gray>Glanced off!"
   riposte: "<white>Riposte!"
   stun: "<gold>Stunned!"
-  warcry-used: "<gold><cry>!"
+  # The riposte war cry's formal duel. <seconds>/<opponent>; <mine>/<theirs> are the damage tallies.
+  duel-start: "<gold>Duel! <yellow><opponent></yellow> <dark_gray>·</dark_gray> <white><seconds>s"
+  duel-bar: "<gold>Duel <white><seconds>s <dark_gray>·</dark_gray> <red><mine></red> vs <blue><theirs></blue>"
+  duel-win: "<gold>You won the duel against <yellow><opponent></yellow>!"
+  duel-loss: "<gray>You lost the duel against <yellow><opponent></yellow>."
+  duel-draw: "<gray>Your duel with <yellow><opponent></yellow> ends in a draw."
+  duel-no-target: "<gray>No one nearby to challenge."
+  warcry-used: "<gold>You let out <yellow><cry></yellow>!"
+  warcry-broadcast: "<gold><player> lets out <yellow><cry></yellow>!"
   warcry-none: "<gray>This stance has nothing to shout about."
+  warcry-locked: "<red>War cries need a level <yellow><level></yellow> warrior."
   warcry-cooldown: "<red>Your voice is spent — wait <yellow><seconds></yellow>s."
   warcry-fervor: "<red>Not enough Fervor — you need <yellow><fervor></yellow>."
-  menu-title: "Stances"
-  menu-active: "<green>Active"
-  menu-available: "<gray>Click to switch"
-  menu-locked: "<red>Unlocks at level <level>"
-  menu-wrong-weapon: "<red>Wrong weapon in hand"
   particles-on: "<green>Warrior particles enabled."
   particles-off: "<gray>Warrior particles disabled. Sound cues stay on."
+
+# Runesmith: enchant carving via armour trims.
+runes:
+  # Display names for the 18 vanilla trim patterns. Override the file's own comment; keep the ids
+  # in sync with runes/<id>.yml.
+  pattern-names:
+    coast: "Coast"
+    dune: "Dune"
+    eye: "Eye"
+    host: "Host"
+    raiser: "Raiser"
+    rib: "Rib"
+    sentry: "Sentry"
+    shaper: "Shaper"
+    silence: "Silence"
+    snout: "Snout"
+    spire: "Spire"
+    tide: "Tide"
+    vex: "Vex"
+    ward: "Ward"
+    wayfinder: "Wayfinder"
+    wild: "Wild"
+    bolt: "Bolt"
+    flow: "Flow"
+  carve-not-runesmith: "<red>You don't know how to carve runes."
+  carve-disabled: "<red>Runes are disabled."
+  carve-banned: "<red>The <yellow><rune></yellow> <red>rune is permanently disabled on this server."
+  carve-no-rune: "<red>No pattern here matches a registered rune."
+  carve-need-material: "<red>You need a trim material (copper through netherite) somewhere in your inventory."
+  carve-tier-locked: "<red>That material needs a level <yellow><level></yellow> runesmith."
+  carve-non-armor-locked: "<red>Runing weapons and tools needs a level <yellow><level></yellow> runesmith."
+  carve-min-level: "<red><rune> <red>needs a level <yellow><level></yellow> runesmith."
+  carve-one-per-item: "<red>This item already carries the <yellow><rune></yellow> rune."
+  carve-upgrade-locked: "<red>Upgrading a rune needs a level <yellow><level></yellow> runesmith."
+  carve-upgrade-limit: "<red>This rune has already been upgraded the maximum <yellow><max></yellow> times."
+  carve-upgrade-no-gain: "<red>That material is no better than what's already carved."
+  carve-win: "<green>The rune takes — <yellow><rune></yellow> <green>at level <yellow><roman></yellow>."
+  carve-partial: "<yellow>The rune holds, but weaker than hoped — <yellow><rune></yellow> <yellow>at level <yellow><roman></yellow>."
+  carve-fail: "<red>The carve slips — the item is cursed instead."
+  duplicate-need-level: "<red>Duplicating templates needs a level <yellow><level></yellow> runesmith."
+  duplicate-need-materials: "<red>You need <yellow><cost></yellow> to duplicate this template."
+  duplicate-need-material: "<red>You need a trim material (copper through netherite) somewhere in your inventory to duplicate this template."
+  duplicate-need-single: "<red>Hold exactly one template to duplicate it — split the stack first."
+  duplicate-is-copy: "<red>This template is already a copy — it can't be duplicated again."
+  duplicate-exhausted: "<red>This template has already been copied as many times as it allows."
+  duplicate-done: "<green>You duplicate the template. <yellow><remaining></yellow> <green>copies left in this one."
+  transfer-need-level: "<red>Transferring a rune needs a level <yellow><level></yellow> runesmith."
+  transfer-need-target: "<red>Hold the item to receive the rune in your off hand."
+  transfer-target-invalid: "<red>That item can't carry this rune."
+  transfer-done: "<green>The rune moves to the item in your off hand."
+  strip-need-level: "<red>Stripping a curse needs a level <yellow><level></yellow> runesmith."
+  strip-not-cursed: "<gray>This item carries no rune-curse to strip."
+  strip-done: "<green>The curse lifts."
+  read-header: "<gradient:#8e6bd6:#43c6e0>-- Rune --</gradient>"
+  read-line: "<yellow><rune></yellow> <gray>level <yellow><roman></yellow> <gray>| modifier <yellow><modifier></yellow> <gray>| upgrades <yellow><upgrades></yellow>/<max> <gray>| rerolls <yellow><rerolls></yellow>"
+  read-cursed: "<dark_red>Cursed — needs a level 3 runesmith to strip."
+  resonance-proc: "<gradient:#8e6bd6:#43c6e0>Resonance!</gradient>"
+  # Lore line shown on runed gear. <name> = pattern name, <roman> = enchant level.
+  rune-lore: "<light_purple><name> <dark_gray><roman>"
 
 minigame:
   unknown: "<red>No minigame with id <yellow><id></yellow>. Available: <list>."

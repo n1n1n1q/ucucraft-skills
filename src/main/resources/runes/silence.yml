@@ -1,0 +1,3 @@
+# Silence trim -> Silk Touch. Ships at enchanting.overrides: 0 — a rune is the only way to get it.
+enchantment: silk_touch
+min-class-level: 4

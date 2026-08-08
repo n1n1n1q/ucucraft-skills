@@ -21,7 +21,8 @@ effects:
   riposte-window-ticks: 60
   riposte-crit-multiplier: 1.75
   parry-fervor-refund: 10
-  # Виклик: the marked duel target takes more and parries land twice as often against it.
+  # Виклик opens a formal duel (see warrior.combat.duel). On top of the duel's own rules, the
+  # opponent takes this much extra and the warrior parries them twice as often.
   duel-damage-bonus: 3.0
   duel-parry-multiplier: 2.0
 
@@ -32,7 +33,7 @@ particles:
   count: 6
   size: 0.9
 
-# Виклик: mark the nearest hostile as your duel.
+# Виклик: challenge the nearest player to a formal duel (warrior.combat.duel).
 warcry:
   id: challenge
   duration-seconds: 10

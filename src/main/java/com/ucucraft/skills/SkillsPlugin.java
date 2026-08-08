@@ -5,8 +5,10 @@ import com.ucucraft.skills.classes.SkillClassRegistry;
 import com.ucucraft.skills.classes.impl.BlacksmithClass;
 import com.ucucraft.skills.classes.impl.ExampleClass;
 import com.ucucraft.skills.classes.impl.HunterClass;
+import com.ucucraft.skills.classes.impl.RunesmithClass;
 import com.ucucraft.skills.classes.impl.ThiefClass;
 import com.ucucraft.skills.classes.impl.WarriorClass;
+import com.ucucraft.skills.command.DamageMeter;
 import com.ucucraft.skills.command.SkillsCommand;
 import com.ucucraft.skills.config.ConfigManager;
 import com.ucucraft.skills.data.DataStore;
@@ -23,6 +25,13 @@ import com.ucucraft.skills.hunter.GlowService;
 import com.ucucraft.skills.hunter.HunterCombat;
 import com.ucucraft.skills.hunter.HunterCrossbow;
 import com.ucucraft.skills.hunter.HunterManager;
+import com.ucucraft.skills.hunter.HunterSteadyAim;
+import com.ucucraft.skills.runes.EnchantmentGate;
+import com.ucucraft.skills.runes.ResonanceService;
+import com.ucucraft.skills.runes.RuneRegistry;
+import com.ucucraft.skills.runes.RuneRoller;
+import com.ucucraft.skills.runes.RuneService;
+import com.ucucraft.skills.runes.RunesmithManager;
 import com.ucucraft.skills.smithing.HarderRecipes;
 import com.ucucraft.skills.smithing.ModifierRegistry;
 import com.ucucraft.skills.smithing.ModifierRoller;
@@ -50,6 +59,7 @@ public final class SkillsPlugin extends JavaPlugin {
     private ModifierRegistry modifierRegistry;
     private HarderRecipes harderRecipes;
     private WarriorManager warriorManager;
+    private RuneRegistry runeRegistry;
 
     @Override
     public void onEnable() {
@@ -66,6 +76,7 @@ public final class SkillsPlugin extends JavaPlugin {
         classRegistry.register(new ThiefClass(configManager));
         WarriorClass warriorClass = new WarriorClass(configManager);
         classRegistry.register(warriorClass);
+        classRegistry.register(new RunesmithClass(configManager));
 
         classManager = new ClassManager(dataStore, classRegistry, lang, configManager);
 
@@ -94,6 +105,7 @@ public final class SkillsPlugin extends JavaPlugin {
         HunterCombat hunterCombat = new HunterCombat(this, configManager, classManager,
                 modifierService, modifierRegistry, glowService);
         HunterCrossbow hunterCrossbow = new HunterCrossbow(this, configManager, classManager);
+        HunterSteadyAim hunterSteadyAim = new HunterSteadyAim(this, configManager, classManager, lang);
         // Expose the glow ability so other plugins can install a custom GlowPolicy.
         getServer().getServicesManager().register(GlowService.class, glowService, this,
                 org.bukkit.plugin.ServicePriority.Normal);
@@ -111,6 +123,17 @@ public final class SkillsPlugin extends JavaPlugin {
         warriorManager.register();
         warriorClass.bind(warriorManager.stances());
 
+        // Runesmith: enchant carving via armor trims, plus the six-path vanilla enchant cap.
+        runeRegistry = new RuneRegistry(this);
+        runeRegistry.load();
+        RuneRoller runeRoller = new RuneRoller(configManager);
+        RuneService runeService = new RuneService(this, lang);
+        EnchantmentGate enchantmentGate = new EnchantmentGate(configManager, runeRegistry, runeService);
+        RunesmithManager runesmithManager = new RunesmithManager(this, lang, configManager, classManager,
+                minigameManager, runeRegistry, runeRoller, runeService, modifierService, enchantmentGate);
+        ResonanceService resonanceService = new ResonanceService(configManager, lang, classManager,
+                runeService, runeRegistry);
+
         getServer().getPluginManager().registerEvents(classManager, this);
         getServer().getPluginManager().registerEvents(minigameManager, this);
         getServer().getPluginManager().registerEvents(smithingManager, this);
@@ -118,15 +141,24 @@ public final class SkillsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(glowService, this);
         getServer().getPluginManager().registerEvents(hunterCombat, this);
         getServer().getPluginManager().registerEvents(hunterCrossbow, this);
+        getServer().getPluginManager().registerEvents(hunterSteadyAim, this);
+        hunterSteadyAim.start();
         getServer().getPluginManager().registerEvents(thiefManager, this);
         getServer().getPluginManager().registerEvents(thiefCombat, this);
         getServer().getPluginManager().registerEvents(thiefPickpocket, this);
         getServer().getPluginManager().registerEvents(thiefSmoke, this);
+        getServer().getPluginManager().registerEvents(runesmithManager, this);
+        getServer().getPluginManager().registerEvents(resonanceService, this);
+        getServer().getPluginManager().registerEvents(enchantmentGate, this);
         getServer().getPluginManager().registerEvents(
                 new ScrollListener(scrollItem, classManager, classRegistry, lang), this);
 
         Objects.requireNonNull(getCommand("skills")).setExecutor(new SkillsCommand(
                 this, lang, classManager, classRegistry, scrollItem, minigameManager, warriorManager));
+
+        DamageMeter damageMeter = new DamageMeter(lang);
+        getServer().getPluginManager().registerEvents(damageMeter, this);
+        Objects.requireNonNull(getCommand("damage")).setExecutor(damageMeter);
     }
 
     @Override
@@ -142,12 +174,13 @@ public final class SkillsPlugin extends JavaPlugin {
         }
     }
 
-    /** Reload config, language, modifiers, crafting recipes and stances at runtime. */
+    /** Reload config, language, modifiers, crafting recipes, stances and runes at runtime. */
     public void reloadAll() {
         configManager.reload();
         lang.reload();
         modifierRegistry.load();
         harderRecipes.register(configManager.raw().getConfigurationSection("crafting.harder-recipes"));
         warriorManager.reload();
+        runeRegistry.load();
     }
 }

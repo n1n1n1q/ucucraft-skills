@@ -7,12 +7,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -29,7 +23,7 @@ import java.util.UUID;
  * generic shout. The cost is Fervor — everything above {@code spend-down-to} — and the effect scales
  * with how much was spent. Tunables: {@code warrior.warcry} plus the stance's {@code warcry} block.
  */
-public final class WarCryService implements Listener {
+public final class WarCryService {
 
     private final Plugin plugin;
     private final ConfigManager config;
@@ -41,12 +35,13 @@ public final class WarCryService implements Listener {
     private final WarriorTargets targets;
     private final StanceApplier applier;
     private final WarriorCombat combat;
+    private final DuelService duels;
     private final Map<UUID, Long> cooldowns = new HashMap<>();
-    private final Map<UUID, Long> lastSwap = new HashMap<>();
 
     public WarCryService(Plugin plugin, ConfigManager config, LangManager lang, StanceService stances,
                          FervorService fervor, StunService stuns, StanceEffects effects,
-                         WarriorTargets targets, StanceApplier applier, WarriorCombat combat) {
+                         WarriorTargets targets, StanceApplier applier, WarriorCombat combat,
+                         DuelService duels) {
         this.plugin = plugin;
         this.config = config;
         this.lang = lang;
@@ -57,58 +52,79 @@ public final class WarCryService implements Listener {
         this.targets = targets;
         this.applier = applier;
         this.combat = combat;
+        this.duels = duels;
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onDrop(PlayerDropItemEvent event) {
-        if (trigger("drop") && event.getPlayer().isSneaking() && shout(event.getPlayer())) {
-            event.setCancelled(true);
+    /**
+     * True when a war cry would fire right now — level, warm-up, stance, cooldown and Fervor all pass.
+     * The sneak + swap-hand input shouts when this holds and cycles stances otherwise.
+     */
+    public boolean ready(Player warrior) {
+        if (!config.raw().getBoolean("warrior.enabled", true)
+                || stances.level(warrior) < config.raw().getInt("warrior.warcry.min-level", 4)
+                || stances.warmingUp(warrior)
+                || !stances.selected(warrior).hasCry()) {
+            return false;
         }
+        Long readyAt = cooldowns.get(warrior.getUniqueId());
+        if (readyAt != null && System.currentTimeMillis() < readyAt) {
+            return false;
+        }
+        return fervor.atLeast(warrior, config.raw().getDouble("warrior.warcry.min-fervor", 30));
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onLeftClick(PlayerInteractEvent event) {
-        if (trigger("left-click-air") && event.getAction() == Action.LEFT_CLICK_AIR
-                && event.getPlayer().isSneaking()) {
-            shout(event.getPlayer());
-        }
+    /** Milliseconds left on this warrior's war-cry cooldown, or 0 when a cry is ready to shout. */
+    public long cooldownRemaining(Player warrior) {
+        Long until = cooldowns.get(warrior.getUniqueId());
+        return until == null ? 0 : Math.max(0, until - System.currentTimeMillis());
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onSwap(PlayerSwapHandItemsEvent event) {
-        if (!trigger("double-swap") || !event.getPlayer().isSneaking()) {
-            return;
-        }
-        long now = System.currentTimeMillis();
-        Long previous = lastSwap.put(event.getPlayer().getUniqueId(), now);
-        if (previous != null && now - previous < 500 && shout(event.getPlayer())) {
-            event.setCancelled(true);
-        }
+    /** The full cooldown length in milliseconds — the denominator for the HUD's cooldown bar. */
+    public long cooldownTotalMs() {
+        return Math.round(config.raw().getDouble("warrior.warcry.cooldown-seconds", 45) * 1000);
     }
 
-    private boolean trigger(String id) {
-        return id.equalsIgnoreCase(config.raw().getString("warrior.warcry.trigger", "drop"));
+    /** Console trace of the war-cry pipeline; off unless {@code warrior.warcry.debug} is set. */
+    private void debug(Player player, String message) {
+        if (config.raw().getBoolean("warrior.warcry.debug", false)) {
+            plugin.getLogger().info("[warcry] " + player.getName() + ": " + message);
+        }
     }
 
     /** Runs the level, stance, cooldown and Fervor gates, then performs the cry. */
     public boolean shout(Player warrior) {
-        if (!config.raw().getBoolean("warrior.enabled", true)
-                || stances.level(warrior) < config.raw().getInt("warrior.warcry.min-level", 4)) {
+        if (!config.raw().getBoolean("warrior.enabled", true)) {
+            debug(warrior, "shout blocked: warrior module disabled");
             return false;
         }
-        Stance stance = stances.active(warrior);
+        int minLevel = config.raw().getInt("warrior.warcry.min-level", 4);
+        if (stances.level(warrior) < minLevel) {
+            debug(warrior, "shout blocked: level " + stances.level(warrior) + " < min " + minLevel);
+            lang.send(warrior, "warrior.warcry-locked", Map.of("level", String.valueOf(minLevel)));
+            return false;
+        }
+        if (stances.warmingUp(warrior)) {
+            debug(warrior, "shout blocked: stance is warming up");
+            return false;
+        }
+        // The cry belongs to the stance the player CHOSE, not the one currently in force — sneaking to
+        // shout suspends a `no-bonus-while-sneaking` stance (e.g. skirmish) to neutral, which has none.
+        Stance stance = stances.selected(warrior);
         if (!stance.hasCry()) {
+            debug(warrior, "shout blocked: selected stance '" + stance.id() + "' has no war cry");
             lang.send(warrior, "warrior.warcry-none");
             return false;
         }
         long now = System.currentTimeMillis();
         Long ready = cooldowns.get(warrior.getUniqueId());
         if (ready != null && now < ready) {
+            debug(warrior, "shout blocked: on cooldown for " + ((ready - now) / 1000 + 1) + "s");
             lang.send(warrior, "warrior.warcry-cooldown", Map.of("seconds", String.valueOf((ready - now) / 1000 + 1)));
             return false;
         }
         double gate = config.raw().getDouble("warrior.warcry.min-fervor", 30);
         if (!fervor.atLeast(warrior, gate)) {
+            debug(warrior, "shout blocked: Fervor " + Math.round(fervor.value(warrior)) + " < gate " + Math.round(gate));
             lang.send(warrior, "warrior.warcry-fervor", Map.of("fervor", String.valueOf(Math.round(gate))));
             return false;
         }
@@ -120,18 +136,36 @@ public final class WarCryService implements Listener {
                 ? Math.max(config.raw().getDouble("warrior.warcry.min-scale", 0.5),
                         Math.min(1.0, spent / fervor.max()))
                 : 1.0;
+        debug(warrior, "SHOUTING '" + stance.cry().id() + "' (stance " + stance.id()
+                + ", spent " + Math.round(spent) + " Fervor, power " + String.format("%.2f", power) + ")");
         perform(warrior, stance, power);
         stances.refresh(warrior);
-        lang.send(warrior, "warrior.warcry-used", Map.of(
-                "cry", lang.plain("warrior.warcry-names." + stance.cry().id()),
-                "stance", stances.displayName(stance)));
+        announce(warrior, stance);
         return true;
+    }
+
+    /** The caster hears their own cry; everyone within its radius sees it announced in chat. */
+    private void announce(Player warrior, Stance stance) {
+        String cry = lang.plain("warrior.warcry-names." + stance.cry().id());
+        lang.send(warrior, "warrior.warcry-used", Map.of("cry", cry, "stance", stances.displayName(stance)));
+        Map<String, String> broadcast = Map.of(
+                "player", warrior.getName(), "cry", cry, "stance", stances.displayName(stance));
+        for (Player nearby : warrior.getWorld().getNearbyPlayers(warrior.getLocation(), cryRadius(stance))) {
+            if (!nearby.equals(warrior)) {
+                lang.send(nearby, "warrior.warcry-broadcast", broadcast);
+            }
+        }
+    }
+
+    private double cryRadius(Stance stance) {
+        return stance.cry().radius() > 0
+                ? stance.cry().radius() : config.raw().getDouble("warrior.warcry.radius", 8);
     }
 
     private void perform(Player warrior, Stance stance, double power) {
         Stance.Cry cry = stance.cry();
         int duration = (int) Math.max(20, Math.round(cry.durationTicks() * power));
-        double radius = cry.radius() > 0 ? cry.radius() : config.raw().getDouble("warrior.warcry.radius", 8);
+        double radius = cryRadius(stance);
         effects.cry(warrior, stance, radius);
 
         int allyBonus = stance.flag("cry-scale-with-armor") ? armorBonus(warrior, stance) : 0;
@@ -156,8 +190,13 @@ public final class WarCryService implements Listener {
         if (cry.traits().contains(Stance.Trait.STUN_NEXT_HIT)) {
             combat.armStun(warrior, duration);
         }
-        if (cry.traits().contains(Stance.Trait.DUEL) && !hostiles.isEmpty()) {
-            combat.markDuel(warrior, nearest(warrior, hostiles), duration);
+        if (cry.traits().contains(Stance.Trait.DUEL)) {
+            Player opponent = nearestPlayer(warrior, hostiles);
+            if (opponent != null) {
+                duels.start(warrior, opponent);
+            } else {
+                lang.send(warrior, "warrior.duel-no-target");
+            }
         }
     }
 
@@ -215,14 +254,18 @@ public final class WarCryService implements Listener {
                 .multiply(config.raw().getDouble("warrior.warcry.knockback", 0.8)).setY(0.35));
     }
 
-    private LivingEntity nearest(Player warrior, List<LivingEntity> candidates) {
-        LivingEntity best = candidates.get(0);
+    /** The nearest player among the candidates — a duel needs another player, not a mob. */
+    private Player nearestPlayer(Player warrior, List<LivingEntity> candidates) {
+        Player best = null;
         double bestDistance = Double.MAX_VALUE;
         for (LivingEntity candidate : candidates) {
-            double distance = candidate.getLocation().distanceSquared(warrior.getLocation());
+            if (!(candidate instanceof Player other)) {
+                continue;
+            }
+            double distance = other.getLocation().distanceSquared(warrior.getLocation());
             if (distance < bestDistance) {
                 bestDistance = distance;
-                best = candidate;
+                best = other;
             }
         }
         return best;
@@ -230,6 +273,5 @@ public final class WarCryService implements Listener {
 
     public void forget(UUID uuid) {
         cooldowns.remove(uuid);
-        lastSwap.remove(uuid);
     }
 }

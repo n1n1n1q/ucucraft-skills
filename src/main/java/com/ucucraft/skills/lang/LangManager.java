@@ -59,7 +59,7 @@ public final class LangManager {
 
     /** Message with the configured prefix, ready to send. */
     public Component msg(String key, Map<String, String> placeholders) {
-        return parse(config.prefix() + messages.getString(key, key), placeholders);
+        return parse(config.prefix() + string(key), placeholders);
     }
 
     public Component msg(String key) {
@@ -68,7 +68,7 @@ public final class LangManager {
 
     /** Message without the prefix (action bars, item names, inline text). */
     public Component component(String key, Map<String, String> placeholders) {
-        return parse(messages.getString(key, key), placeholders);
+        return parse(string(key), placeholders);
     }
 
     public Component component(String key) {
@@ -85,7 +85,18 @@ public final class LangManager {
 
     /** Raw MiniMessage string for a key (used as a placeholder value). */
     public String plain(String key) {
-        return messages.getString(key, key);
+        return string(key);
+    }
+
+    /**
+     * The string for a key, falling back to the key itself when it is defined nowhere. Consults the
+     * bundled jar defaults on purpose: {@code getString(key, key)} would pass an explicit default and
+     * so never reach them, leaving a stale data-folder lang file (one predating a new key) rendering
+     * the raw key instead of the shipped text.
+     */
+    private String string(String key) {
+        String value = messages.getString(key);
+        return value != null ? value : key;
     }
 
     public List<String> list(String key) {

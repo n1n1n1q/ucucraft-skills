@@ -6,7 +6,6 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -18,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Every visual and audible cue the warrior produces: the ambient stance aura plus the event bursts
@@ -84,16 +84,25 @@ public final class StanceEffects {
         sound(player.getLocation(), "parry", 1.4f);
     }
 
-    /** Dull scrape plus a grey puff: a glance reads as a bad angle, not as input loss. */
-    public void glance(Player player, Entity victim) {
-        Location at = victim.getLocation().add(0, 1, 0);
-        render(at, List.of(new Vector()), Particle.DUST, Color.fromRGB(0x8A8A8A), 1.4, 8);
-        sound(at, "glance", 0.6f);
+    /** Grey puff on the warrior: a glancing blow reads as a deflection off them, not a whiff. */
+    public void glance(Player warrior) {
+        render(warrior.getLocation().add(0, 1, 0), List.of(new Vector()), Particle.DUST,
+                Color.fromRGB(0x8A8A8A), 1.4, 8);
+    }
+
+    /** A gold ring under each duellist, spawned to only the two of them — their private duel marker. */
+    public void duelAura(Player a, Player b) {
+        List<Vector> ring = ring(0.8, 0.1, 10, 0);
+        List<Player> viewers = List.of(a, b);
+        renderFor(a.getLocation(), ring, Color.fromRGB(0xFFB000), 1.1, viewers);
+        renderFor(b.getLocation(), ring, Color.fromRGB(0xFFB000), 1.1, viewers);
     }
 
     /** Orbiting crit marks above a stunned target for the whole duration. */
     public void stun(LivingEntity target, int durationTicks) {
-        sound(target.getLocation(), "stun", 1f);
+        if (config.raw().getBoolean("warrior.combat.stun.sound", true)) {
+            sound(target.getLocation(), "stun", 1f);
+        }
         if (!enabled()) {
             return;
         }
@@ -113,20 +122,27 @@ public final class StanceEffects {
         }.runTaskTimer(plugin, 0L, 4L);
     }
 
-    /** Expanding ground ring in the stance colour. */
+    /**
+     * The war cry burst, in the stance's own colour: an expanding shockwave of rings that reach the
+     * full radius, a dense fill of the whole disc so the area of effect is legible on the ground, and
+     * a rising dome — all scaled by the radius. Paired with the {@code warcry} sound.
+     */
     public void cry(Player player, Stance stance, double radius) {
         sound(player.getLocation(), "warcry", 1f);
         if (!enabled()) {
             return;
         }
         Location origin = player.getLocation();
+        Particle particle = stance.aura().particle();
+        Color color = stance.aura().color();
         for (int step = 0; step < 5; step++) {
             double r = radius * (step + 1) / 5.0;
             plugin.getServer().getScheduler().runTaskLater(plugin,
-                    () -> render(origin, ring(r, 0.1, (int) Math.max(8, r * 6), 0),
-                            stance.aura().particle(), stance.aura().color(), 1.5, 1),
+                    () -> render(origin, ring(r, 0.1, (int) Math.max(8, r * 6), 0), particle, color, 1.5, 1),
                     step * 2L);
         }
+        render(origin, disc(radius, (int) Math.max(30, radius * radius * 5)), particle, color, 1.2, 1);
+        render(origin, dome(radius, (int) Math.max(20, radius * 10)), particle, color, 1.1, 1);
     }
 
     public void sound(Location where, String id, float pitch) {
@@ -162,6 +178,27 @@ public final class StanceEffects {
                 } else {
                     viewer.spawnParticle(particle, at, perPoint, 0, 0, 0, 0, dust);
                 }
+            }
+        }
+    }
+
+    /**
+     * Dust spawned to a fixed set of viewers instead of everyone in range — a per-client effect only
+     * those players see. Still honours the global toggle and each viewer's {@code particles off}.
+     */
+    private void renderFor(Location origin, List<Vector> points, Color color, double size,
+                           List<Player> viewers) {
+        if (!enabled() || origin.getWorld() == null || points.isEmpty()) {
+            return;
+        }
+        Particle.DustOptions dust = new Particle.DustOptions(color, (float) Math.max(0.1, size));
+        for (Player viewer : viewers) {
+            if (viewer == null || !viewer.isOnline() || muted.contains(viewer.getUniqueId())
+                    || !origin.getWorld().equals(viewer.getWorld())) {
+                continue;
+            }
+            for (Vector point : points) {
+                viewer.spawnParticle(Particle.DUST, origin.clone().add(point), 1, 0, 0, 0, 0, dust);
             }
         }
     }
@@ -234,6 +271,32 @@ public final class StanceEffects {
         for (int i = 0; i < count; i++) {
             double angle = i * 2 * Math.PI / count;
             points.add(new Vector(Math.cos(angle) * radius, 0.05, Math.sin(angle) * radius));
+        }
+        return points;
+    }
+
+    /** A uniform scatter of points across the ground disc of the given radius. */
+    private List<Vector> disc(double radius, int count) {
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        List<Vector> points = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            double r = radius * Math.sqrt(rng.nextDouble());
+            double angle = rng.nextDouble() * 2 * Math.PI;
+            points.add(new Vector(Math.cos(angle) * r, 0.1, Math.sin(angle) * r));
+        }
+        return points;
+    }
+
+    /** A scatter of points over the upper hemisphere, so the burst reads as a dome of the radius. */
+    private List<Vector> dome(double radius, int count) {
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        List<Vector> points = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            double theta = rng.nextDouble() * 2 * Math.PI;
+            double phi = Math.acos(rng.nextDouble()); // upper hemisphere only
+            double r = radius * 0.9;
+            points.add(new Vector(Math.sin(phi) * Math.cos(theta) * r,
+                    Math.cos(phi) * r, Math.sin(phi) * Math.sin(theta) * r));
         }
         return points;
     }

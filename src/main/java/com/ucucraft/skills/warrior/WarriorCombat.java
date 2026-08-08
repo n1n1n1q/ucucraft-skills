@@ -30,7 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
  *   <li>a stunned attacker's melee is cancelled outright;</li>
  *   <li><b>parry</b> (warrior is the victim) — resolved before the attacker's own rolls because a
  *       parry cancels the hit entirely; it also opens the riposte window;</li>
- *   <li><b>glance</b> (warrior is the damager) — a halved hit with no stance bonuses, never a whiff;</li>
+ *   <li><b>glance</b> (warrior is the victim) — a defensive deflection: an incoming blow that grazes
+ *       the warrior for a fraction of its damage. It is a buff, not the warrior's own attack missing;</li>
  *   <li>stance bonuses — riposte crit, sprint crit, charge bonus, duel bonus, cleave/sunder splash;</li>
  *   <li>Fervor gain, then the <b>stun</b> roll with all of its gates.</li>
  * </ol>
@@ -40,8 +41,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class WarriorCombat implements Listener {
 
-    private record Duel(UUID target, long expiresAt) {}
-
     private final ConfigManager config;
     private final LangManager lang;
     private final StanceService stances;
@@ -49,14 +48,14 @@ public final class WarriorCombat implements Listener {
     private final StunService stuns;
     private final StanceEffects effects;
     private final WarriorTargets targets;
+    private final DuelService duels;
     private final Map<UUID, Long> parryCooldowns = new HashMap<>();
     private final Map<UUID, Long> riposteWindows = new HashMap<>();
     private final Map<UUID, Long> armedStuns = new HashMap<>();
-    private final Map<UUID, Duel> duels = new HashMap<>();
 
     public WarriorCombat(ConfigManager config, LangManager lang, StanceService stances,
                          FervorService fervor, StunService stuns, StanceEffects effects,
-                         WarriorTargets targets) {
+                         WarriorTargets targets, DuelService duels) {
         this.config = config;
         this.lang = lang;
         this.stances = stances;
@@ -64,6 +63,7 @@ public final class WarriorCombat implements Listener {
         this.stuns = stuns;
         this.effects = effects;
         this.targets = targets;
+        this.duels = duels;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -76,9 +76,11 @@ public final class WarriorCombat implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (event.getEntity() instanceof Player defender && stances.isWarrior(defender)
-                && tryParry(defender, event)) {
-            return;
+        if (event.getEntity() instanceof Player defender && stances.isWarrior(defender)) {
+            if (tryParry(defender, event)) {
+                return; // a parry cancels the hit outright
+            }
+            tryGlance(defender, event); // otherwise a blow may still glance off for reduced damage
         }
         if (event.getDamager() instanceof Player warrior && stances.isWarrior(warrior)
                 && event.getEntity() instanceof LivingEntity target
@@ -98,8 +100,8 @@ public final class WarriorCombat implements Listener {
         }
         Stance stance = stances.active(warrior);
         double chance = clamp(stance.rolls().parry());
-        Duel duel = duel(warrior);
-        if (duel != null && duel.target().equals(damager.getUniqueId())) {
+        UUID opponent = duels.opponentOf(warrior);
+        if (opponent != null && opponent.equals(damager.getUniqueId())) {
             chance = clamp(chance * stance.effect("duel-parry-multiplier", 2));
         }
         if (chance <= 0) {
@@ -128,18 +130,33 @@ public final class WarriorCombat implements Listener {
         return true;
     }
 
+    /**
+     * A glancing blow: an incoming melee or projectile hit that deflects off the warrior for a
+     * fraction of its damage. Chance is the stance's own {@code glance-chance}; the on-screen cue and
+     * the sound each toggle via {@code warrior.combat.glance.hud} / {@code .sound}.
+     */
+    private boolean tryGlance(Player warrior, EntityDamageByEntityEvent event) {
+        boolean projectile = event.getDamager() instanceof Projectile;
+        if (!projectile && !isMelee(event)) {
+            return false; // only weapon blows glance — not fire, fall or explosions
+        }
+        double chance = clamp(stances.active(warrior).rolls().glance());
+        if (chance <= 0 || !roll(chance)) {
+            return false;
+        }
+        event.setDamage(event.getDamage() * config.raw().getDouble("warrior.combat.glance.multiplier", 0.5));
+        effects.glance(warrior);
+        if (config.raw().getBoolean("warrior.combat.glance.hud", true)) {
+            warrior.sendActionBar(lang.component("warrior.glance"));
+        }
+        if (config.raw().getBoolean("warrior.combat.glance.sound", true)) {
+            effects.sound(warrior.getLocation(), "glance", 0.6f);
+        }
+        return true;
+    }
+
     private void resolveAttack(Player warrior, LivingEntity target, EntityDamageByEntityEvent event) {
         Stance stance = stances.active(warrior);
-
-        if (roll(clamp(stance.rolls().glance()))) {
-            event.setDamage(event.getDamage() * config.raw().getDouble("warrior.combat.glance-multiplier", 0.5));
-            fervor.add(warrior, -config.raw().getDouble("warrior.fervor.glance-loss", 10));
-            stances.refresh(warrior);
-            effects.glance(warrior, target);
-            warrior.sendActionBar(lang.component("warrior.glance"));
-            return;
-        }
-
         boolean charging = movingToward(target, warrior, stance.effect("charge-threshold", 0.2));
         double damage = event.getDamage();
         // Every parry opens the window, but only a stance that defines a multiplier crits from it.
@@ -155,8 +172,8 @@ public final class WarriorCombat implements Listener {
         if (charging) {
             damage += stance.effect("charge-bonus", 0);
         }
-        Duel duel = duel(warrior);
-        if (duel != null && duel.target().equals(target.getUniqueId())) {
+        UUID opponent = duels.opponentOf(warrior);
+        if (opponent != null && opponent.equals(target.getUniqueId())) {
             damage += stance.effect("duel-damage-bonus", 0);
         }
         event.setDamage(damage);
@@ -196,15 +213,10 @@ public final class WarriorCombat implements Listener {
                 || !roll(chance)) {
             return;
         }
-        if (stuns.tryStun(warrior, target, duration)) {
+        if (stuns.tryStun(warrior, target, duration)
+                && config.raw().getBoolean("warrior.combat.stun.hud", true)) {
             warrior.sendActionBar(lang.component("warrior.stun"));
         }
-    }
-
-    /** Marks a duel target: bonus damage against it and a doubled parry chance while it lasts. */
-    public void markDuel(Player warrior, LivingEntity target, int durationTicks) {
-        duels.put(warrior.getUniqueId(),
-                new Duel(target.getUniqueId(), System.currentTimeMillis() + durationTicks * 50L));
     }
 
     /** Arms the warrior's next landed hit to stun regardless of the stance's own chance. */
@@ -216,19 +228,6 @@ public final class WarriorCombat implements Listener {
         parryCooldowns.remove(uuid);
         riposteWindows.remove(uuid);
         armedStuns.remove(uuid);
-        duels.remove(uuid);
-    }
-
-    private Duel duel(Player warrior) {
-        Duel duel = duels.get(warrior.getUniqueId());
-        if (duel == null) {
-            return null;
-        }
-        if (System.currentTimeMillis() >= duel.expiresAt()) {
-            duels.remove(warrior.getUniqueId());
-            return null;
-        }
-        return duel;
     }
 
     private boolean consumeRiposte(Player warrior) {

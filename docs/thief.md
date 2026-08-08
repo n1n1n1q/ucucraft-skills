@@ -24,7 +24,7 @@ Both are optional; the plugin runs without them (declared as `softdepend` in `pl
 |---|---|
 | 1 | **Lockpicking.** Right-click a container holding a lockpick. If the chunk holds members of the owning country (`thief.lockpick.require-country-members`), a minigame runs; a **loud** sound plays during and at the end (the theft is meant to be risky). On success the container opens. |
 | 2 | **Fall control** — sneaking while falling negates fall damage for falls up to `thief.fall.max-blocks` (15). **Backstab** — a sneaking hit from behind deals `thief.backstab.multiplier`× damage. |
-| 3 | **Pickpocket** — sneak + right-click a player to start a minigame (`thief.pickpocket.minigame`, default `typing`); win it to open a menu of `thief.pickpocket.choices` (5) random items from the victim — the one you click is dropped to you and the victim is notified. On a cooldown. |
+| 3 | **Pickpocket** — sneak + right-click a player to start a minigame (`thief.pickpocket.minigame`, default `typing`); win it to open a menu of `thief.pickpocket.choices` (5) random items from the victim — the one you click is dropped to you and the victim is notified. The victim must still be within `thief.pickpocket.max-distance` (4) blocks when the minigame ends, or it fails (they slipped away). On a cooldown. |
 | 4 | **Smoke Screen** — sneak + swap-hand (F) drops a smoke bomb (`thief.smoke.cooldown-seconds`, default 30s): a `CAMPFIRE_SIGNAL_SMOKE` cloud, Blindness to nearby entities, and Speed II + Invisibility for the thief. |
 
 ## Notes

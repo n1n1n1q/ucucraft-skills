@@ -29,7 +29,7 @@ a non-hearing hunter can compensate (accessibility rule, see [CLAUDE.md](../CLAU
 |---|---|
 | 1 | **Reforge at the archer table.** Right-click a `hunter.table-material` (default `FLETCHING_TABLE`) holding a bow to instantly reroll its modifier (no minigame) for a material cost (`hunter.reroll.cost`), up to `hunter.reroll.max-rerolls` (5) times per item. Odds scale L1→L4; always yields a positive, so it also clears a debuff. |
 | 2 | **Slow arrow** — `hunter.arrow-slow.chance` per shot for `damage-multiplier` damage + slowness, with a sound cue and particle trail. **Highlight prey** — sneak + right-click a bow to make nearby mobs glow and be *marked* (see below). |
-| 3 | **Crossbow mastery** — `keep-loaded-chance` to keep the crossbow loaded after firing (the arrow stays in it), plus a passive faster reload (a `quick-charge-level` bonus while holding a crossbow; vanilla has no loading-speed attribute). |
+| 3 | **Crossbow mastery** — `keep-loaded-chance` to keep the crossbow loaded after firing (the arrow stays in it), so the hunter can fire again immediately without reloading. **Steady aim** — sneak and hold still with a bow/crossbow for `steady-aim.charge-seconds` to charge a focused shot; the next arrow deals `steady-aim.damage-multiplier` damage. Charge progress and the ready state show on the action bar (a visual cue), optionally paired with `ready-sound`. Moving or unsneaking cancels it. |
 | 4 | **Hit stacking** — consecutive arrow hits add `damage-per-stack` up to `max-bonus` within a time window. **Marked kill** — killing highlighted prey grants a speed + regen burst with an effect. |
 
 ## Highlight ability & external API

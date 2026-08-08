@@ -12,6 +12,10 @@ commands:
     description: Manage classes, scrolls and minigames.
     usage: /skills help
     aliases: [sk, class]
+  damage:
+    description: Toggle a readout of the damage each of your hits deals (admin).
+    usage: /damage [on|off]
+    permission: skills.admin
 
 permissions:
   skills.use:
@@ -19,4 +23,7 @@ permissions:
     default: true
   skills.admin:
     description: Grant classes, give scrolls, run admin commands.
+    default: op
+  skills.enchanting.bypass:
+    description: Skip the vanilla enchant-level cap (EnchantmentGate) everywhere it applies.
     default: op

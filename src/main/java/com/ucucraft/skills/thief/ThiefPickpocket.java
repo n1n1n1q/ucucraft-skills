@@ -105,6 +105,10 @@ public final class ThiefPickpocket implements Listener {
             lang.send(thief, "thief.pickpocket-empty");
             return;
         }
+        if (tooFar(thief, victim)) {
+            lang.send(thief, "thief.pickpocket-too-far");
+            return;
+        }
         openMenu(thief, victim);
     }
 
@@ -185,6 +189,13 @@ public final class ThiefPickpocket implements Listener {
     private String plain(ItemStack item) {
         return net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
                 .serialize(item.effectiveName());
+    }
+
+    /** True if the victim left the world or drifted beyond {@code thief.pickpocket.max-distance}. */
+    private boolean tooFar(Player thief, Player victim) {
+        double max = config.raw().getDouble("thief.pickpocket.max-distance", 4);
+        return victim.getWorld() != thief.getWorld()
+                || victim.getLocation().distanceSquared(thief.getLocation()) > max * max;
     }
 
     private int thiefLevel(Player player) {

@@ -35,11 +35,11 @@ consumed — whenever the held item does not match, and snaps back when re-equip
 | id | Ukrainian | Weapon | Gain | Cost | Lvl |
 |---|---|---|---|---|---|
 | `neutral` | Вільна | any | — | — | 1 |
-| `onslaught` | Наступ | any melee | +`attack_damage`, +`attack_speed` | −`armor`, −`knockback_resistance`, **glance chance** | 1 |
+| `onslaught` | Наступ | any melee | +`attack_damage`, +`attack_speed`, **glance chance** (deflects incoming hits) | −`armor`, −`knockback_resistance` | 1 |
 | `guard` | Оборона | any melee | +`armor`, +`knockback_resistance`, **highest parry** | −`attack_damage`, −`movement_speed` | 1 |
 | `skirmish` | Натиск | sword / axe | +`movement_speed`, sprint-attacks always crit | −`armor_toughness`, no bonus while sneaking | 2 |
 | `phalanx` | Стіна | trident (spear) | +`entity_interaction_range`, bonus damage vs targets moving **toward** you | −`attack_speed`, −`movement_speed` | 2 |
-| `cleave` | Розкол | axe | splash `cleave-percent` to `cleave-max-targets`, armor-shred stacks | −`attack_speed`, double durability cost, **glance chance** | 3 |
+| `cleave` | Розкол | axe | splash `cleave-percent` to `cleave-max-targets`, armor-shred stacks, **glance chance** (deflects incoming hits) | −`attack_speed`, double durability cost | 3 |
 | `sunder` | Злам | mace | +smash radius, Slowness on hit, **highest stun** | −`movement_speed`, −`attack_speed` | 3 |
 | `riposte` | Відповідь | sword | parry opens a crit window; parries refund Fervor | −`armor` | 3 |
 
@@ -67,16 +67,19 @@ Resolution order:
    > Deviation from the original design sketch: parry resolves **before** the attacker's own rolls,
    > because it cancels the event outright. Resolving it later would mean cleave splash and Fervor
    > gain had already happened for a hit that never landed.
-3. **Glance** (warrior is the damager) — `glance-chance`. Damage × `glance-multiplier` (0.5), no
-   stance bonuses, −`fervor.glance-loss`. A *reduced* hit rather than a whiff: a full miss on a
-   landed swing feels like input loss, a glance reads as a bad angle.
+3. **Glance** (warrior is the **victim**, melee or projectile) — `glance-chance`. An incoming blow
+   deflects off the warrior for `glance.multiplier` (0.5) of its damage. This is a *buff* — a partial
+   dodge, not the warrior's own attack missing — resolved right after parry (which cancels the hit
+   outright) on the defensive side. `glance.hud` / `glance.sound` toggle the action-bar cue and the
+   sound independently.
 4. **Stance bonuses** — riposte crit window, skirmish sprint crit, phalanx charge bonus, duel bonus,
    then cleave/sunder splash and shred.
 5. **Fervor gain**, then the **stun** roll: `stun-chance`, gated by attacker cooldown
    (`stun.cooldown-seconds`, 8), target immunity (`stun.immunity-seconds`, 6), a Fervor floor
    (`stun.min-fervor`, 0 = off) and any stance requirement (`stun-requires-charge`,
    `stun-requires-shield`). Diminishing returns per target inside `stun.dr-window-seconds` (20):
-   duration × `1.0 / 0.5 / 0.25 / 0`.
+   duration × `1.0 / 0.5 / 0.25 / 0`. `stun.hud` / `stun.sound` toggle the action-bar cue on the
+   warrior and the sound on the target independently.
 
 Per-stance defaults (`combat:` block in the stance file):
 
@@ -108,9 +111,9 @@ honesty:
 
 ## Switching
 
-- **sneak + swap-hand (F)** — cycle the stances available for the held weapon.
-- **sneak + right-click air, holding a melee weapon** — open the stance menu and pick directly.
-  (The weapon check keeps sneaking-to-eat and sneaking-to-draw-a-bow working.)
+- **sneak + swap-hand (F)** — the warrior's one gesture: it shouts a war cry when one is ready
+  (below), otherwise it cycles to the next stance available for the held weapon. There is no picker
+  GUI. So once you have enough Fervor for a cry, sneak + F fires it instead of cycling.
 - A switch has a `warrior.stance.warmup-ticks` (20) telegraph: rising helix in the *new* stance's
   colour + sound, **no bonuses applied** during it, cancelled if you take damage. You cannot flip
   into `guard` mid-swing for free.
@@ -121,10 +124,9 @@ honesty:
 
 ## Fervor (Запал)
 
-Landing melee hits and parrying build Fervor (`per-hit`, `parry.fervor-gain`); glances
-(`glance-loss`) and time out of combat drain it (`decay-per-second`), cap `max`. Above
-`charge-threshold` each stance adds its **charged** attribute block and the aura brightens.
-A war cry consumes it.
+Landing melee hits and parrying build Fervor (`per-hit`, `parry.fervor-gain`); time out of combat
+drains it (`decay-per-second`), cap `max`. Above `charge-threshold` each stance adds its **charged**
+attribute block and the aura brightens. A war cry consumes it.
 
 `warrior.fervor.enabled: false` removes the bar, the charged tier and the Fervor gates; war cries
 fall back to a plain cooldown.
@@ -132,9 +134,13 @@ fall back to a plain cooldown.
 ## War cries (level 4) — one per stance
 
 Each stance has its own cry in its own file, so level 4 re-reads the whole stance list instead of
-adding one generic shout. Trigger: `warrior.warcry.trigger` (default sneak + drop key, event
-cancelled). Cost: all Fervor above `spend-down-to`, gated by `min-fervor`; the effect scales with
-the amount spent (never below `min-scale`), plus `cooldown-seconds`.
+adding one generic shout. Trigger: **sneak + swap-hand (F)** — the same key that cycles stances.
+When a cry is ready (level 4, not warming up, the selected stance has a cry, off cooldown, and
+Fervor ≥ `min-fervor`) that gesture shouts; otherwise it falls through to a stance cycle. Cost:
+all Fervor above `spend-down-to`, gated by `min-fervor`; the effect scales with the amount spent
+(never below `min-scale`), plus `cooldown-seconds`. The cry is announced in chat to the caster
+(`warrior.warcry-used`) and to every player within its radius (`warrior.warcry-broadcast`), and
+bursts a radius-filling cloud of the stance's colour with the `warcry` sound.
 
 | stance | Cry | Effect | Traits |
 |---|---|---|---|
@@ -145,11 +151,37 @@ the amount spent (never below `min-scale`), plus `cooldown-seconds`.
 | `phalanx` | **Спис вперед** | Frontal cone: knockback + root on everything approaching; allies get Resistance. | `CONE`, `KNOCKBACK` |
 | `cleave` | **Вихор** | Instant 360° sweep at `cleave-percent` × 2, applying shred to everything in reach. | `SWEEP` |
 | `sunder` | **Землетрус** | Ground shockwave: stuns every grounded target in radius (still DR-gated). | `SHOCKWAVE` |
-| `riposte` | **Виклик** | Duel-mark the nearest target: +damage against it, parry chance vs it doubled. | `DUEL` |
+| `riposte` | **Виклик** | Open a formal **duel** with the nearest player (see below). | `DUEL` |
 
 Potion effects (`self-effects`, `ally-effects`, `hostile-effects`) and temporary attribute buffs
 (`buff-attributes`) are pure data; the traits above are the named behaviours the code implements.
 "Allies" means every player in radius the warrior may not harm (see below), plus themselves.
+
+### The duel (`Виклик`)
+
+The riposte cry's `DUEL` trait is not a debuff-mark but a self-contained bout, owned by
+[`DuelService`](../src/main/java/com/ucucraft/skills/warrior/DuelService.java) and tuned under
+`warrior.combat.duel`. It challenges the **nearest player** (mobs are ignored — a duel needs a
+second player); if none is in the cry's radius nothing happens.
+
+For `duration-seconds` (15):
+
+- **The two fighters are sealed off.** Each deals and takes only `outsider-damage-multiplier`
+  (0.25) to *any other player* — mobs and the environment are untouched. It is strictly
+  player-vs-player, so a third party can neither rescue a loser nor farm the pair.
+- **Against each other, damage is full**, and the initiating warrior hits for
+  `warrior-damage-multiplier` (1.10). On top of that the riposte stance's own
+  `duel-damage-bonus` / `duel-parry-multiplier` still apply (flat extra damage and doubled parry
+  chance vs the opponent), resolved in [`WarriorCombat`](../src/main/java/com/ucucraft/skills/warrior/WarriorCombat.java).
+- **Both carry a countdown boss bar** (replacing the warrior's Fervor bar for the duration) showing
+  the time left and the running damage tally, plus a **gold particle aura only the two of them can
+  see** — spawned per-viewer, so it honours `/skills particles off` like every other warrior visual.
+
+It ends when the timer runs out (higher damage tally wins; equal is a draw) or the moment one
+fighter dies or logs out (the other wins). **Only a warrior victory pays out** — `win-effects` for
+`win-duration-seconds`; an opponent win or a draw rewards no one. The damage scaling runs at
+`HIGHEST` priority, after the warrior's own glance/parry/stun rolls, so a parried or glanced duel
+hit tallies the damage that actually landed.
 
 ## Stance auras
 
@@ -168,7 +200,8 @@ Ambient particles, defined per stance, spawned from the one warrior task at
 | `riposte` | `#DCDCDC` | thin vertical helix |
 
 - Colour comes from `Particle.DUST` + `DustOptions`; the **shape differs per stance too**, because
-  colour alone fails for colour-blind players, and the action bar name is the third channel.
+  colour alone fails for colour-blind players, and the boss-bar HUD name is the third channel — a
+  boss bar whose fill tracks Fervor, shown while a melee weapon is held (`warrior.hud`).
 - Fervor scales `count` and `size` — a charged warrior is visibly charged, which is also the tell an
   opponent needs.
 - Event bursts reuse the stance colour: warm-up = rising helix, parry = white arc + shield sound,
